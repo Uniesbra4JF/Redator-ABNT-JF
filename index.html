@@ -48,7 +48,6 @@
             background-color: white;
         }
         
-        /* Estilos e Animações do FAB Menu */
         #fab-container.open #fab-icon-open { transform: rotate(45deg); }
         #fab-menu {
             transition: opacity 0.3s ease, transform 0.3s ease;
@@ -77,7 +76,6 @@
 </head>
 <body>
 
-    <!-- Header -->
     <header class="bg-gray-800 text-white shadow-md w-full sticky top-0 z-20">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
@@ -90,7 +88,6 @@
         </div>
     </header>
 
-    <!-- Main Content -->
     <main class="container mx-auto p-4 sm:p-6 lg:p-8 flex flex-col md:flex-row gap-8">
         <div class="w-full h-full flex-1 flex flex-col"><textarea id="editor" class="w-full h-full flex-grow border-2 border-gray-200 rounded-lg leading-relaxed focus:ring-2 focus:ring-blue-500" placeholder="Comece a digitar sua redação aqui..."></textarea></div>
         <aside class="hidden md:block w-full md:w-72">
@@ -107,16 +104,13 @@
         </aside>
     </main>
 
-    <!-- Rodapé -->
     <footer class="bg-gray-800 text-white text-center p-4 mt-auto"><p>&copy; 2024 Redator ABNT | Todos os direitos reservados.</p></footer>
 
-    <!-- Botão Flutuante (Mobile) -->
     <div id="fab-container" class="md:hidden fixed bottom-6 right-6 z-30">
         <div id="fab-menu" class="absolute bottom-20 right-0 w-64 bg-white rounded-lg shadow-2xl py-2"><button data-action="save" class="fab-menu-item w-full text-left px-4 py-3 text-gray-700 hover:bg-gray-100"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M7.707 10.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V6a1 1 0 10-2 0v5.586L7.707 10.293zM5 3a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V5a2 2 0 00-2-2H5z" /></svg><span>Salvar Rascunho</span></button><button data-action="load" class="fab-menu-item w-full text-left px-4 py-3 text-gray-700 hover:bg-gray-100"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd" /></svg><span>Carregar Rascunho</span></button><hr class="my-1" /><button data-action="preview" class="fab-menu-item w-full text-left px-4 py-3 text-gray-700 hover:bg-gray-100"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z" /><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.022 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" /></svg><span>Pré-visualizar</span></button><button data-action="pdf" class="fab-menu-item w-full text-left px-4 py-3 text-gray-700 hover:bg-gray-100"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 0v4.586A1.5 1.5 0 007.586 10H12v2.5a.5.5 0 01-1 0V10H7.5a.5.5 0 01-.5-.5V4H6z" clip-rule="evenodd" /></svg><span>Exportar PDF</span></button><button data-action="docx" class="fab-menu-item w-full text-left px-4 py-3 text-gray-700 hover:bg-gray-100"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 0v4.586A1.5 1.5 0 007.586 10H12v2.5a.5.5 0 01-1 0V10H7.5a.5.5 0 01-.5-.5V4H6z" clip-rule="evenodd" /></svg><span>Exportar Word</span></button><hr class="my-1" /><button data-action="clear" class="fab-menu-item w-full text-left px-4 py-3 text-red-500 hover:bg-red-50"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg><span>Limpar Editor</span></button></div>
         <button id="fab" class="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center text-white shadow-lg focus:outline-none"><svg id="fab-icon-open" class="h-8 w-8 transition-transform duration-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg></button>
     </div>
     
-    <!-- Modals -->
     <div id="settings-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-40 hidden"><div class="bg-white rounded-lg shadow-xl w-full max-w-md p-6"><div class="flex justify-between items-center mb-4"><h2 class="text-2xl font-bold">Configurações ABNT</h2><button id="close-settings-btn" class="text-gray-500 hover:text-gray-800 text-3xl">&times;</button></div><p class="text-gray-600">Funcionalidade em desenvolvimento.</p><div class="mt-6 flex justify-end"><button id="close-settings-btn-2" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Fechar</button></div></div></div>
     <div id="preview-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-40 hidden"><div class="bg-white rounded-lg shadow-xl w-full max-w-4xl h-5/6 flex flex-col"><div class="flex justify-between items-center p-4 border-b"><h2 class="text-2xl font-bold">Pré-visualização ABNT</h2><button id="close-preview-btn" class="text-gray-500 hover:text-gray-800 text-3xl">&times;</button></div><div id="preview-area" class="p-6 overflow-y-auto flex-grow bg-gray-200"><div id="preview-content-wrapper" class="preview-content shadow-lg mx-auto" style="width: 21cm; min-height: 29.7cm;"></div></div><div class="p-4 border-t flex justify-end bg-gray-50"><button id="close-preview-btn-2" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Fechar</button></div></div></div>
     <div id="share-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden"><div class="bg-white rounded-lg shadow-xl w-full max-w-sm p-6 text-center"><h2 class="text-2xl font-bold mb-2">Arquivo Gerado!</h2><p class="text-gray-600 mb-6">Seu documento está pronto. O que você gostaria de fazer?</p><div class="flex flex-col space-y-3"><button id="download-file-btn" class="action-btn w-full bg-blue-600 text-white hover:bg-blue-700">Baixar Arquivo</button><button id="share-file-btn" class="action-btn w-full bg-green-500 text-white hover:bg-green-600 hidden">Compartilhar</button><button id="close-share-btn" class="mt-4 text-gray-600 hover:text-gray-800">Fechar</button></div></div></div>
@@ -160,7 +154,6 @@
                 try {
                     const doc = new jsPDF({ unit: 'mm', format: 'a4' });
                     
-                    // Configurações ABNT
                     const FONT_SIZE = 12;
                     const LEFT_MARGIN = 30;
                     const RIGHT_MARGIN = 20;
@@ -171,9 +164,10 @@
                     const PAGE_HEIGHT = doc.internal.pageSize.getHeight();
                     const PRINTABLE_WIDTH = PAGE_WIDTH - LEFT_MARGIN - RIGHT_MARGIN;
                     const FONT_PT_TO_MM = 0.352778;
-                    const LINE_HEIGHT_MM = (FONT_SIZE * FONT_PT_TO_MM) * 1.5;
+                    const LINE_SPACING = 1.5;
+                    const LINE_HEIGHT_MM = (FONT_SIZE * FONT_PT_TO_MM) * LINE_SPACING;
 
-                    doc.setFont("Helvetica", "normal"); // Helvetica é o equivalente do Arial
+                    doc.setFont("Helvetica", "normal");
                     doc.setFontSize(FONT_SIZE);
 
                     let cursorY = TOP_MARGIN;
@@ -181,7 +175,7 @@
 
                     for (const paragraph of paragraphs) {
                         if (paragraph.trim() === "") {
-                             if (cursorY + LINE_HEIGHT_MM > PAGE_HEIGHT - BOTTOM_MARGIN) {
+                            if (cursorY + LINE_HEIGHT_MM > PAGE_HEIGHT - BOTTOM_MARGIN) {
                                 doc.addPage();
                                 cursorY = TOP_MARGIN;
                             }
@@ -189,19 +183,41 @@
                             continue;
                         }
 
-                        const lines = doc.splitTextToSize(paragraph, PRINTABLE_WIDTH);
+                        const words = paragraph.split(/\s+/);
+                        let lines = [];
+                        let currentLine = '';
+                        let isFirstLineOfPara = true;
+
+                        for(let i = 0; i < words.length; i++) {
+                            let word = words[i];
+                            let lineWithNextWord = currentLine ? `${currentLine} ${word}` : word;
+                            let availableWidth = isFirstLineOfPara ? PRINTABLE_WIDTH - PARAGRAPH_INDENT : PRINTABLE_WIDTH;
+                            
+                            if (doc.getTextWidth(lineWithNextWord) <= availableWidth) {
+                                currentLine = lineWithNextWord;
+                            } else {
+                                lines.push(currentLine);
+                                currentLine = word;
+                                isFirstLineOfPara = false;
+                            }
+                        }
+                        lines.push(currentLine);
 
                         for (let i = 0; i < lines.length; i++) {
+                            let line = lines[i];
+                            const isFirstLine = i === 0;
+                            const isLastLine = i === lines.length - 1;
+
                             if (cursorY + LINE_HEIGHT_MM > PAGE_HEIGHT - BOTTOM_MARGIN) {
                                 doc.addPage();
                                 cursorY = TOP_MARGIN;
                             }
                             
-                            const isFirstLineOfParagraph = i === 0;
-                            const xOffset = isFirstLineOfParagraph ? LEFT_MARGIN + PARAGRAPH_INDENT : LEFT_MARGIN;
-                            const lineWidth = isFirstLineOfParagraph ? PRINTABLE_WIDTH - PARAGRAPH_INDENT : PRINTABLE_WIDTH;
+                            const xOffset = isFirstLine ? LEFT_MARGIN + PARAGRAPH_INDENT : LEFT_MARGIN;
+                            const renderWidth = isFirstLine ? PRINTABLE_WIDTH - PARAGRAPH_INDENT : PRINTABLE_WIDTH;
+                            const alignment = isLastLine ? 'left' : 'justify';
                             
-                            doc.text(lines[i], xOffset, cursorY, { align: 'justify', maxWidth: lineWidth });
+                            doc.text(line, xOffset, cursorY, { align: alignment, maxWidth: renderWidth });
                             cursorY += LINE_HEIGHT_MM;
                         }
                     }
@@ -229,10 +245,10 @@
                 try {
                     generatedBlob = await htmlToDocx(htmlString, null, {
                         orientation: 'portrait',
-                        margins: { top: 1701, right: 1134, bottom: 1134, left: 1701 }, // 3cm, 2cm, 2cm, 3cm
+                        margins: { top: 1701, right: 1134, bottom: 1134, left: 1701 },
                         font: 'Arial',
-                        fontSize: 24, // 12pt * 2
-                        paragraph: { spacing: { line: 360 }, alignment: 'justify', indentation: { firstLine: 709 } } // 1.5, justify, 1.25cm
+                        fontSize: 24,
+                        paragraph: { spacing: { line: 360 }, alignment: 'justify', indentation: { firstLine: 709 } }
                     });
                     generatedFileName = 'documento-ABNT.docx';
                     showShareModal();
@@ -257,12 +273,10 @@
         }
 
         function setupEventListeners() {
-            document.getElementById('save-draft-btn').addEventListener('click', e => actions.save(e.currentTarget));
-            document.getElementById('load-draft-btn').addEventListener('click', e => actions.load(e.currentTarget));
-            document.getElementById('clear-editor-btn').addEventListener('click', e => actions.clear(e.currentTarget));
-            document.getElementById('preview-btn').addEventListener('click', e => actions.preview(e.currentTarget));
-            document.getElementById('export-pdf-btn').addEventListener('click', e => actions.pdf(e.currentTarget));
-            document.getElementById('export-docx-btn').addEventListener('click', e => actions.docx(e.currentTarget));
+            document.querySelectorAll('aside .action-btn').forEach(btn => {
+                const action = btn.id.split('-')[1];
+                if(actions[action]) btn.addEventListener('click', e => actions[action](e.currentTarget));
+            });
 
             const fabContainer = document.getElementById('fab-container');
             const fab = document.getElementById('fab');
