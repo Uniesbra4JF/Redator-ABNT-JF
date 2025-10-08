@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redator ABNT</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Bibliotecas para Exportação -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://unpkg.com/html-to-docx@1.8.0/dist/browser/html-to-docx.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <style>
+        html, body { height: 100%; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            flex-direction: column;
+        }
+        main { flex-grow: 1; }
+        #editor {
+            resize: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            font-size: 1.125rem;
+            padding: 2rem;
+        }
+        #editor:focus {
+            box-shadow: 0 4px 20px rgba(60, 130, 246, 0.2);
+            border-color: #3b82f6;
+            outline: none;
+        }
+        .modal-enter-active { animation: fadeIn 0.2s ease-out forwards; }
+        .modal-leave-active { animation: fadeOut 0.2s ease-in forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        @keyframes fadeOut { from { opacity: 1; transform: scale(1); } to { opacity: 0; transform: scale(0.95); } }
+        .preview-content {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 12pt;
+            line-height: 1.5;
+            text-align: justify;
+            padding: 85px 56px;
+            color: black;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="bg-gray-800 text-white shadow-md w-full sticky top-0 z-20">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <svg class="h-8 w-8 mr-2 text-blue-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v11.494m-5.747-8.494h11.494M4 12a8 8 0 018-8v0a8 8 0 018 8v0a8 8 0 01-8 8v0a8 8 0 01-8-8v0z" /></svg>
+                    <h1 class="text-xl font-bold">Redator ABNT</h1>
+                </div>
+                <button id="settings-btn" class="p-2 rounded-full hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white" title="Configurações"><svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg></button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto p-4 sm:p-6 lg:p-8 flex flex-col md:flex-row gap-8">
+        <div class="w-full h-full flex-1 flex flex-col"><textarea id="editor" class="w-full h-full flex-grow border-2 border-gray-200 rounded-lg leading-relaxed focus:ring-2 focus:ring-blue-500" placeholder="Comece a digitar sua redação aqui..."></textarea></div>
+        <aside class="hidden md:block w-full md:w-72">
+            <div class="bg-white p-4 rounded-lg shadow-md space-y-3 sticky top-24">
+                <h2 class="font-bold text-lg text-center mb-4">Ações</h2>
+                <button id="save-draft-btn" class="action-btn w-full bg-blue-600 text-white hover:bg-blue-700">Salvar Rascunho</button>
+                <button id="load-draft-btn" class="action-btn w-full bg-gray-200 text-gray-800 hover:bg-gray-300">Carregar Rascunho</button>
+                <button id="clear-editor-btn" class="action-btn w-full bg-red-500 text-white hover:bg-red-600">Limpar Editor</button>
+                <hr class="my-3"/>
+                <button id="preview-btn" class="action-btn w-full bg-green-500 text-white hover:bg-green-600">Pré-visualizar ABNT</button>
+                <button id="export-pdf-btn" class="action-btn w-full bg-gray-800 text-white hover:bg-black">Exportar PDF (ABNT)</button>
+                <button id="export-docx-btn" class="action-btn w-full bg-gray-800 text-white hover:bg-black">Exportar Word (ABNT)</button>
+            </div>
+        </aside>
+    </main>
+
+    <!-- Rodapé -->
+    <footer class="bg-gray-800 text-white text-center p-4 mt-auto"><p>&copy; 2024 Redator ABNT | Todos os direitos reservados.</p></footer>
+
+    <!-- Botão Flutuante (Mobile) -->
+    <div id="fab-container" class="md:hidden fixed bottom-6 right-6 z-30">
+        <button id="fab" class="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center text-white shadow-lg focus:outline-none transform transition-transform duration-200 hover:scale-110">
+            <svg id="fab-icon-open" class="h-8 w-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+            <svg id="fab-icon-close" class="h-8 w-8 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
+        <div id="fab-menu" class="absolute bottom-20 right-0 w-56 bg-white rounded-lg shadow-xl py-2 hidden">
+             <button data-action="save" class="fab-menu-item">Salvar Rascunho</button>
+             <button data-action="load" class="fab-menu-item">Carregar Rascunho</button>
+             <button data-action="clear" class="fab-menu-item text-red-500">Limpar Editor</button>
+             <hr class="my-2"/>
+             <button data-action="preview" class="fab-menu-item">Pré-visualizar</button>
+             <button data-action="pdf" class="fab-menu-item">Exportar PDF</button>
+             <button data-action="docx" class="fab-menu-item">Exportar Word</button>
+        </div>
+    </div>
+    
+    <!-- Modals -->
+    <div id="settings-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-40 hidden">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
+            <div class="flex justify-between items-center mb-4"><h2 class="text-2xl font-bold">Configurações ABNT</h2><button id="close-settings-btn" class="text-gray-500 hover:text-gray-800 text-3xl">&times;</button></div>
+            <p class="text-gray-600">Funcionalidade em desenvolvimento.</p>
+            <div class="mt-6 flex justify-end"><button id="close-settings-btn-2" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Fechar</button></div>
+        </div>
+    </div>
+
+    <div id="preview-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-40 hidden">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-4xl h-5/6 flex flex-col">
+            <div class="flex justify-between items-center p-4 border-b"><h2 class="text-2xl font-bold">Pré-visualização ABNT</h2><button id="close-preview-btn" class="text-gray-500 hover:text-gray-800 text-3xl">&times;</button></div>
+            <div id="preview-area" class="p-6 overflow-y-auto flex-grow bg-gray-200"><div id="preview-content-wrapper" class="preview-content bg-white shadow-lg mx-auto" style="width: 21cm; min-height: 29.7cm;"></div></div>
+            <div class="p-4 border-t flex justify-end bg-gray-50"><button id="close-preview-btn-2" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Fechar</button></div>
+        </div>
+    </div>
+    
+    <div id="share-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-sm p-6 text-center">
+            <h2 class="text-2xl font-bold mb-2">Arquivo Gerado!</h2>
+            <p class="text-gray-600 mb-6">Seu documento está pronto. O que você gostaria de fazer?</p>
+            <div class="flex flex-col space-y-3">
+                <button id="download-file-btn" class="action-btn w-full bg-blue-600 text-white hover:bg-blue-700">Baixar Arquivo</button>
+                <button id="share-file-btn" class="action-btn w-full bg-green-500 text-white hover:bg-green-600 hidden">Compartilhar</button>
+                <button id="close-share-btn" class="mt-4 text-gray-600 hover:text-gray-800">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="notification" class="fixed top-5 right-5 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg opacity-0 transform -translate-y-12 transition-all duration-300 z-50"><p></p></div>
+
+    <script>
+        const { jsPDF } = window.jspdf;
+        const editor = document.getElementById('editor');
+        const notification = document.getElementById('notification');
+        let generatedBlob = null;
+        let generatedFileName = '';
+
+        function showNotification(message, isError = false, duration = 3000) {
+            notification.querySelector('p').textContent = message;
+            notification.classList.toggle('bg-red-500', isError);
+            notification.classList.toggle('bg-green-500', !isError);
+            notification.classList.remove('opacity-0', '-translate-y-12');
+            setTimeout(() => notification.classList.add('opacity-0', '-translate-y-12'), duration);
+        }
+
+        function getFormattedContent(forDocx = false) {
+            const paragraphs = editor.value.split('\n').map(p => {
+                const text = p.trim() ? p.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') : '&nbsp;';
+                // Para DOCX, o recuo é melhor aplicado via configurações de parágrafo, não CSS.
+                // Para PDF/Preview, o text-indent funciona bem.
+                const style = forDocx ? '' : 'style="text-indent: 2cm;"';
+                return `<p ${style}>${text}</p>`;
+            }).join('');
+            return paragraphs;
+        }
+        
+        const actions = {
+            save: () => {
+                localStorage.setItem('abntDraft', editor.value);
+                showNotification('Rascunho salvo com sucesso!');
+            },
+            load: () => {
+                const draft = localStorage.getItem('abntDraft');
+                if (draft) editor.value = draft;
+            },
+            clear: () => {
+                if (window.confirm('Tem certeza que deseja limpar o editor?')) {
+                    editor.value = '';
+                    showNotification('Editor limpo.');
+                }
+            },
+            preview: () => {
+                document.getElementById('preview-content-wrapper').innerHTML = getFormattedContent();
+                openModal(document.getElementById('preview-modal'));
+            },
+            pdf: async (btn) => {
+                if (!editor.value.trim()) return showNotification('O editor está vazio.', true);
+                const originalText = btn.innerHTML;
+                btn.disabled = true;
+                btn.innerHTML = 'Gerando PDF...';
+                
+                showNotification('Preparando PDF...', false, 6000);
+
+                const previewContent = document.getElementById('preview-content-wrapper');
+                previewContent.innerHTML = getFormattedContent();
+                const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+
+                try {
+                    await pdf.html(previewContent, {
+                        margin: [30, 20, 20, 30],
+                        autoPaging: 'text',
+                        width: 160,
+                        windowWidth: 794 
+                    });
+                    generatedBlob = pdf.output('blob');
+                    generatedFileName = 'documento-ABNT.pdf';
+                    showShareModal();
+                } catch (error) {
+                    console.error("Erro ao gerar PDF:", error);
+                    showNotification('Falha ao gerar o PDF.', true);
+                } finally {
+                    btn.disabled = false;
+                    btn.innerHTML = originalText;
+                }
+            },
+            docx: async (btn) => {
+                if (!editor.value.trim()) return showNotification('O editor está vazio.', true);
+                const originalText = btn.innerHTML;
+                btn.disabled = true;
+                btn.innerHTML = 'Exportando...';
+
+                const htmlString = `<!DOCTYPE html><html><head><title></title></head><body>${getFormattedContent(true)}</body></html>`;
+                
+                try {
+                    generatedBlob = await htmlToDocx(htmlString, null, {
+                        orientation: 'portrait',
+                        margins: { top: 1701, right: 1134, bottom: 1134, left: 1701 },
+                        paragraph: {
+                           options: {
+                                indent: { left: 1134 } // Recuo de primeira linha (2cm)
+                           }
+                        }
+                    });
+                    generatedFileName = 'documento-ABNT.docx';
+                    showShareModal();
+                } catch (error) {
+                    console.error("Erro ao gerar DOCX:", error);
+                    showNotification('Falha ao gerar o Word.', true);
+                } finally {
+                    btn.disabled = false;
+                    btn.innerHTML = originalText;
+                }
+            }
+        };
+
+        function openModal(modal) {
+            modal.classList.remove('hidden');
+            modal.firstElementChild.classList.add('modal-enter-active');
+        }
+
+        function closeModal(modal) {
+            modal.firstElementChild.classList.add('modal-leave-active');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modal.firstElementChild.classList.remove('modal-enter-active', 'modal-leave-active');
+            }, 200);
+        }
+
+        function showShareModal() {
+            const shareBtn = document.getElementById('share-file-btn');
+            const shareModal = document.getElementById('share-modal');
+            
+            // Verifica se a API de compartilhamento está disponível
+            if (navigator.share && navigator.canShare) {
+                const fileToShare = new File([generatedBlob], generatedFileName, { type: generatedBlob.type });
+                 if (navigator.canShare({ files: [fileToShare] })) {
+                    shareBtn.classList.remove('hidden');
+                 }
+            } else {
+                 shareBtn.classList.add('hidden');
+            }
+            openModal(shareModal);
+        }
+
+        function setupEventListeners() {
+            document.querySelectorAll('.action-btn').forEach(btn => {
+                const action = btn.id.split('-')[1]; // e.g., 'save' from 'save-draft-btn'
+                if(actions[action]) btn.addEventListener('click', e => actions[action](e.currentTarget));
+            });
+            document.getElementById('export-pdf-btn').addEventListener('click', e => actions.pdf(e.currentTarget));
+            document.getElementById('export-docx-btn').addEventListener('click', e => actions.docx(e.currentTarget));
+
+            const fab = document.getElementById('fab');
+            const fabMenu = document.getElementById('fab-menu');
+            fab.addEventListener('click', () => {
+                fabMenu.classList.toggle('hidden');
+                document.getElementById('fab-icon-open').classList.toggle('hidden');
+                document.getElementById('fab-icon-close').classList.toggle('hidden');
+            });
+
+            fabMenu.addEventListener('click', e => {
+                const target = e.target.closest('.fab-menu-item');
+                if (target) {
+                    const action = target.dataset.action;
+                    if (actions[action]) actions[action](target);
+                    fabMenu.classList.add('hidden');
+                    document.getElementById('fab-icon-open').classList.remove('hidden');
+                    document.getElementById('fab-icon-close').classList.add('hidden');
+                }
+            });
+            
+            // Listeners dos Modals
+            document.getElementById('settings-btn').addEventListener('click', () => openModal(document.getElementById('settings-modal')));
+            document.querySelectorAll('[id^="close-"]').forEach(btn => {
+                const modal = btn.closest('.fixed');
+                if(modal) btn.addEventListener('click', () => closeModal(modal));
+            });
+
+            // Listeners do Modal de Compartilhamento
+            document.getElementById('download-file-btn').addEventListener('click', () => {
+                saveAs(generatedBlob, generatedFileName);
+                closeModal(document.getElementById('share-modal'));
+            });
+
+            document.getElementById('share-file-btn').addEventListener('click', async () => {
+                const fileToShare = new File([generatedBlob], generatedFileName, { type: generatedBlob.type });
+                try {
+                    await navigator.share({
+                        files: [fileToShare],
+                        title: generatedFileName,
+                        text: 'Documento criado com o Redator ABNT.'
+                    });
+                } catch (error) {
+                    console.log('Erro ao compartilhar:', error);
+                } finally {
+                    closeModal(document.getElementById('share-modal'));
+                }
+            });
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            setupEventListeners();
+            actions.load();
+        });
+    </script>
+</body>
+</html>
+
+
