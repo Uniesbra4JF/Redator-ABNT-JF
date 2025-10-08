@@ -10,7 +10,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Bibliotecas para Exportação -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://unpkg.com/html-to-docx@1.8.0/dist/browser/html-to-docx.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <style>
@@ -28,6 +27,7 @@
             transition: all 0.3s ease;
             font-size: 1.125rem;
             padding: 2rem;
+            line-height: 1.75;
         }
         #editor:focus {
             box-shadow: 0 4px 20px rgba(60, 130, 246, 0.2);
@@ -39,7 +39,7 @@
         @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
         @keyframes fadeOut { from { opacity: 1; transform: scale(1); } to { opacity: 0; transform: scale(0.95); } }
         .preview-content {
-            font-family: 'Times New Roman', Times, serif;
+            font-family: Arial, sans-serif;
             font-size: 12pt;
             line-height: 1.5;
             text-align: justify;
@@ -49,9 +49,7 @@
         }
         
         /* Estilos e Animações do FAB Menu */
-        #fab-container.open #fab-icon-open {
-            transform: rotate(45deg);
-        }
+        #fab-container.open #fab-icon-open { transform: rotate(45deg); }
         #fab-menu {
             transition: opacity 0.3s ease, transform 0.3s ease;
             transform-origin: bottom right;
@@ -64,8 +62,16 @@
         .fab-menu-item {
             display: flex;
             align-items: center;
-            gap: 0.75rem; /* 12px */
+            gap: 0.75rem;
             transition: background-color 0.2s;
+        }
+        .action-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
         }
     </style>
 </head>
@@ -95,8 +101,8 @@
                 <button id="clear-editor-btn" class="action-btn w-full bg-red-500 text-white hover:bg-red-600">Limpar Editor</button>
                 <hr class="my-3"/>
                 <button id="preview-btn" class="action-btn w-full bg-green-500 text-white hover:bg-green-600">Pré-visualizar ABNT</button>
-                <button id="export-pdf-btn" class="action-btn w-full bg-gray-800 text-white hover:bg-black">Exportar PDF (ABNT)</button>
-                <button id="export-docx-btn" class="action-btn w-full bg-gray-800 text-white hover:bg-black">Exportar Word (ABNT)</button>
+                <button id="export-pdf-btn" class="action-btn w-full bg-gray-800 text-white hover:bg-black">Exportar PDF</button>
+                <button id="export-docx-btn" class="action-btn w-full bg-gray-800 text-white hover:bg-black">Exportar Word</button>
             </div>
         </aside>
     </main>
@@ -106,77 +112,24 @@
 
     <!-- Botão Flutuante (Mobile) -->
     <div id="fab-container" class="md:hidden fixed bottom-6 right-6 z-30">
-        <div id="fab-menu" class="absolute bottom-20 right-0 w-64 bg-white rounded-lg shadow-2xl py-2">
-            <button data-action="save" class="fab-menu-item w-full text-left px-4 py-3 text-gray-700 hover:bg-gray-100">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M7.707 10.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V6a1 1 0 10-2 0v5.586L7.707 10.293zM5 3a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V5a2 2 0 00-2-2H5z" /></svg>
-                <span>Salvar Rascunho</span>
-            </button>
-            <button data-action="load" class="fab-menu-item w-full text-left px-4 py-3 text-gray-700 hover:bg-gray-100">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd" /></svg>
-                <span>Carregar Rascunho</span>
-            </button>
-            <hr class="my-1" />
-            <button data-action="preview" class="fab-menu-item w-full text-left px-4 py-3 text-gray-700 hover:bg-gray-100">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z" /><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.022 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" /></svg>
-                <span>Pré-visualizar</span>
-            </button>
-            <button data-action="pdf" class="fab-menu-item w-full text-left px-4 py-3 text-gray-700 hover:bg-gray-100">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 0v4.586A1.5 1.5 0 007.586 10H12v2.5a.5.5 0 01-1 0V10H7.5a.5.5 0 01-.5-.5V4H6z" clip-rule="evenodd" /></svg>
-                <span>Exportar PDF</span>
-            </button>
-            <button data-action="docx" class="fab-menu-item w-full text-left px-4 py-3 text-gray-700 hover:bg-gray-100">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 0v4.586A1.5 1.5 0 007.586 10H12v2.5a.5.5 0 01-1 0V10H7.5a.5.5 0 01-.5-.5V4H6z" clip-rule="evenodd" /></svg>
-                <span>Exportar Word</span>
-            </button>
-            <hr class="my-1" />
-            <button data-action="clear" class="fab-menu-item w-full text-left px-4 py-3 text-red-500 hover:bg-red-50">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
-                <span>Limpar Editor</span>
-            </button>
-        </div>
-        <button id="fab" class="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center text-white shadow-lg focus:outline-none">
-            <svg id="fab-icon-open" class="h-8 w-8 transition-transform duration-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
-        </button>
+        <div id="fab-menu" class="absolute bottom-20 right-0 w-64 bg-white rounded-lg shadow-2xl py-2"><button data-action="save" class="fab-menu-item w-full text-left px-4 py-3 text-gray-700 hover:bg-gray-100"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M7.707 10.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V6a1 1 0 10-2 0v5.586L7.707 10.293zM5 3a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V5a2 2 0 00-2-2H5z" /></svg><span>Salvar Rascunho</span></button><button data-action="load" class="fab-menu-item w-full text-left px-4 py-3 text-gray-700 hover:bg-gray-100"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd" /></svg><span>Carregar Rascunho</span></button><hr class="my-1" /><button data-action="preview" class="fab-menu-item w-full text-left px-4 py-3 text-gray-700 hover:bg-gray-100"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z" /><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.022 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" /></svg><span>Pré-visualizar</span></button><button data-action="pdf" class="fab-menu-item w-full text-left px-4 py-3 text-gray-700 hover:bg-gray-100"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 0v4.586A1.5 1.5 0 007.586 10H12v2.5a.5.5 0 01-1 0V10H7.5a.5.5 0 01-.5-.5V4H6z" clip-rule="evenodd" /></svg><span>Exportar PDF</span></button><button data-action="docx" class="fab-menu-item w-full text-left px-4 py-3 text-gray-700 hover:bg-gray-100"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 0v4.586A1.5 1.5 0 007.586 10H12v2.5a.5.5 0 01-1 0V10H7.5a.5.5 0 01-.5-.5V4H6z" clip-rule="evenodd" /></svg><span>Exportar Word</span></button><hr class="my-1" /><button data-action="clear" class="fab-menu-item w-full text-left px-4 py-3 text-red-500 hover:bg-red-50"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg><span>Limpar Editor</span></button></div>
+        <button id="fab" class="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center text-white shadow-lg focus:outline-none"><svg id="fab-icon-open" class="h-8 w-8 transition-transform duration-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg></button>
     </div>
     
     <!-- Modals -->
-    <div id="settings-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-40 hidden">
-        <div class="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
-            <div class="flex justify-between items-center mb-4"><h2 class="text-2xl font-bold">Configurações ABNT</h2><button id="close-settings-btn" class="text-gray-500 hover:text-gray-800 text-3xl">&times;</button></div>
-            <p class="text-gray-600">Funcionalidade em desenvolvimento.</p>
-            <div class="mt-6 flex justify-end"><button id="close-settings-btn-2" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Fechar</button></div>
-        </div>
-    </div>
-
-    <div id="preview-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-40 hidden">
-        <div class="bg-white rounded-lg shadow-xl w-full max-w-4xl h-5/6 flex flex-col">
-            <div class="flex justify-between items-center p-4 border-b"><h2 class="text-2xl font-bold">Pré-visualização ABNT</h2><button id="close-preview-btn" class="text-gray-500 hover:text-gray-800 text-3xl">&times;</button></div>
-            <div id="preview-area" class="p-6 overflow-y-auto flex-grow bg-gray-200"><div id="preview-content-wrapper" class="preview-content shadow-lg mx-auto" style="width: 21cm; min-height: 29.7cm;"></div></div>
-            <div class="p-4 border-t flex justify-end bg-gray-50"><button id="close-preview-btn-2" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Fechar</button></div>
-        </div>
-    </div>
-    
-    <div id="share-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden">
-        <div class="bg-white rounded-lg shadow-xl w-full max-w-sm p-6 text-center">
-            <h2 class="text-2xl font-bold mb-2">Arquivo Gerado!</h2>
-            <p class="text-gray-600 mb-6">Seu documento está pronto. O que você gostaria de fazer?</p>
-            <div class="flex flex-col space-y-3">
-                <button id="download-file-btn" class="action-btn w-full bg-blue-600 text-white hover:bg-blue-700">Baixar Arquivo</button>
-                <button id="share-file-btn" class="action-btn w-full bg-green-500 text-white hover:bg-green-600 hidden">Compartilhar</button>
-                <button id="close-share-btn" class="mt-4 text-gray-600 hover:text-gray-800">Fechar</button>
-            </div>
-        </div>
-    </div>
-
+    <div id="settings-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-40 hidden"><div class="bg-white rounded-lg shadow-xl w-full max-w-md p-6"><div class="flex justify-between items-center mb-4"><h2 class="text-2xl font-bold">Configurações ABNT</h2><button id="close-settings-btn" class="text-gray-500 hover:text-gray-800 text-3xl">&times;</button></div><p class="text-gray-600">Funcionalidade em desenvolvimento.</p><div class="mt-6 flex justify-end"><button id="close-settings-btn-2" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Fechar</button></div></div></div>
+    <div id="preview-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-40 hidden"><div class="bg-white rounded-lg shadow-xl w-full max-w-4xl h-5/6 flex flex-col"><div class="flex justify-between items-center p-4 border-b"><h2 class="text-2xl font-bold">Pré-visualização ABNT</h2><button id="close-preview-btn" class="text-gray-500 hover:text-gray-800 text-3xl">&times;</button></div><div id="preview-area" class="p-6 overflow-y-auto flex-grow bg-gray-200"><div id="preview-content-wrapper" class="preview-content shadow-lg mx-auto" style="width: 21cm; min-height: 29.7cm;"></div></div><div class="p-4 border-t flex justify-end bg-gray-50"><button id="close-preview-btn-2" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Fechar</button></div></div></div>
+    <div id="share-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden"><div class="bg-white rounded-lg shadow-xl w-full max-w-sm p-6 text-center"><h2 class="text-2xl font-bold mb-2">Arquivo Gerado!</h2><p class="text-gray-600 mb-6">Seu documento está pronto. O que você gostaria de fazer?</p><div class="flex flex-col space-y-3"><button id="download-file-btn" class="action-btn w-full bg-blue-600 text-white hover:bg-blue-700">Baixar Arquivo</button><button id="share-file-btn" class="action-btn w-full bg-green-500 text-white hover:bg-green-600 hidden">Compartilhar</button><button id="close-share-btn" class="mt-4 text-gray-600 hover:text-gray-800">Fechar</button></div></div></div>
     <div id="notification" class="fixed top-5 right-5 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg opacity-0 transform -translate-y-12 transition-all duration-300 z-50"><p></p></div>
 
     <script>
-        // Script principal (sem alterações na lógica, apenas no controle do FAB)
         const { jsPDF } = window.jspdf;
         const editor = document.getElementById('editor');
         const notification = document.getElementById('notification');
         let generatedBlob = null;
         let generatedFileName = '';
+
+        const spinner = `<svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>`;
 
         function showNotification(message, isError = false, duration = 3000) {
             notification.querySelector('p').textContent = message;
@@ -186,52 +139,105 @@
             setTimeout(() => notification.classList.add('opacity-0', '-translate-y-12'), duration);
         }
 
-        function getFormattedContent() {
-            const paragraphs = editor.value.split('\n').map(p => {
+        function getFormattedContentForPreview() {
+            return editor.value.split('\n').map(p => {
                 const text = p.trim() ? p.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') : '&nbsp;';
                 return `<p style="text-indent: 1.25cm; margin: 0;">${text}</p>`;
             }).join('');
-            return paragraphs;
         }
         
         const actions = {
             save: () => { localStorage.setItem('abntDraft', editor.value); showNotification('Rascunho salvo com sucesso!'); },
             load: () => { const draft = localStorage.getItem('abntDraft'); if (draft) editor.value = draft; },
             clear: () => { if (confirm('Tem certeza que deseja limpar o editor?')) { editor.value = ''; showNotification('Editor limpo.'); } },
-            preview: () => { document.getElementById('preview-content-wrapper').innerHTML = getFormattedContent(); openModal(document.getElementById('preview-modal')); },
+            preview: () => { document.getElementById('preview-content-wrapper').innerHTML = getFormattedContentForPreview(); openModal(document.getElementById('preview-modal')); },
             pdf: async (btn) => {
                 if (!editor.value.trim()) return showNotification('O editor está vazio.', true);
-                const originalText = btn.querySelector('span')?.textContent || 'Exportar PDF';
+                const originalHTML = btn.innerHTML;
                 btn.disabled = true;
-                btn.innerHTML = `<svg class="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24"></svg> Gerando...`;
-                
-                showNotification('Preparando PDF...', false, 6000);
-                const previewContent = document.getElementById('preview-content-wrapper');
-                previewContent.style.cssText += `font-family: 'Times New Roman', Times, serif; font-size: 12pt; line-height: 1.5; text-align: justify;`;
-                previewContent.innerHTML = getFormattedContent();
-                
-                const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+                btn.innerHTML = `${spinner} <span>Gerando...</span>`;
+
                 try {
-                    await pdf.html(previewContent, { margin: [30, 20, 20, 30], autoPaging: 'text', html2canvas: { scale: 0.25 }, width: 160, windowWidth: 794 });
-                    generatedBlob = pdf.output('blob');
+                    const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+                    
+                    // Configurações ABNT
+                    const FONT_SIZE = 12;
+                    const LEFT_MARGIN = 30;
+                    const RIGHT_MARGIN = 20;
+                    const TOP_MARGIN = 30;
+                    const BOTTOM_MARGIN = 20;
+                    const PARAGRAPH_INDENT = 12.5;
+                    const PAGE_WIDTH = doc.internal.pageSize.getWidth();
+                    const PAGE_HEIGHT = doc.internal.pageSize.getHeight();
+                    const PRINTABLE_WIDTH = PAGE_WIDTH - LEFT_MARGIN - RIGHT_MARGIN;
+                    const FONT_PT_TO_MM = 0.352778;
+                    const LINE_HEIGHT_MM = (FONT_SIZE * FONT_PT_TO_MM) * 1.5;
+
+                    doc.setFont("Helvetica", "normal"); // Helvetica é o equivalente do Arial
+                    doc.setFontSize(FONT_SIZE);
+
+                    let cursorY = TOP_MARGIN;
+                    const paragraphs = editor.value.split('\n');
+
+                    for (const paragraph of paragraphs) {
+                        if (paragraph.trim() === "") {
+                             if (cursorY + LINE_HEIGHT_MM > PAGE_HEIGHT - BOTTOM_MARGIN) {
+                                doc.addPage();
+                                cursorY = TOP_MARGIN;
+                            }
+                            cursorY += LINE_HEIGHT_MM;
+                            continue;
+                        }
+
+                        const lines = doc.splitTextToSize(paragraph, PRINTABLE_WIDTH);
+
+                        for (let i = 0; i < lines.length; i++) {
+                            if (cursorY + LINE_HEIGHT_MM > PAGE_HEIGHT - BOTTOM_MARGIN) {
+                                doc.addPage();
+                                cursorY = TOP_MARGIN;
+                            }
+                            
+                            const isFirstLineOfParagraph = i === 0;
+                            const xOffset = isFirstLineOfParagraph ? LEFT_MARGIN + PARAGRAPH_INDENT : LEFT_MARGIN;
+                            const lineWidth = isFirstLineOfParagraph ? PRINTABLE_WIDTH - PARAGRAPH_INDENT : PRINTABLE_WIDTH;
+                            
+                            doc.text(lines[i], xOffset, cursorY, { align: 'justify', maxWidth: lineWidth });
+                            cursorY += LINE_HEIGHT_MM;
+                        }
+                    }
+
+                    generatedBlob = doc.output('blob');
                     generatedFileName = 'documento-ABNT.pdf';
                     showShareModal();
-                } catch (error) { console.error("Erro ao gerar PDF:", error); showNotification('Falha ao gerar o PDF.', true);
-                } finally { btn.disabled = false; btn.innerHTML = originalText; previewContent.style.cssText = ''; }
+                } catch (error) {
+                    console.error("Erro ao gerar PDF:", error);
+                    showNotification('Falha ao gerar o PDF.', true);
+                } finally {
+                    btn.disabled = false;
+                    btn.innerHTML = originalHTML;
+                }
             },
             docx: async (btn) => {
                 if (!editor.value.trim()) return showNotification('O editor está vazio.', true);
-                const originalText = btn.querySelector('span')?.textContent || 'Exportar Word';
+                const originalHTML = btn.innerHTML;
                 btn.disabled = true;
-                btn.innerHTML = `<svg class="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24"></svg> Exportando...`;
+                btn.innerHTML = `${spinner} <span>Exportando...</span>`;
 
-                const htmlString = `<!DOCTYPE html><html><head><style>p { font-family: 'Times New Roman', Times, serif; font-size: 12pt; line-height: 1.5; text-align: justify; }</style></head><body>${getFormattedContent()}</body></html>`;
+                const content = editor.value.split('\n').map(p => `<p>${p.trim() ? p.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') : ''}</p>`).join('');
+                const htmlString = `<!DOCTYPE html><html><head></head><body>${content}</body></html>`;
+                
                 try {
-                    generatedBlob = await htmlToDocx(htmlString, null, { orientation: 'portrait', margins: { top: 1701, right: 1134, bottom: 1134, left: 1701 } });
+                    generatedBlob = await htmlToDocx(htmlString, null, {
+                        orientation: 'portrait',
+                        margins: { top: 1701, right: 1134, bottom: 1134, left: 1701 }, // 3cm, 2cm, 2cm, 3cm
+                        font: 'Arial',
+                        fontSize: 24, // 12pt * 2
+                        paragraph: { spacing: { line: 360 }, alignment: 'justify', indentation: { firstLine: 709 } } // 1.5, justify, 1.25cm
+                    });
                     generatedFileName = 'documento-ABNT.docx';
                     showShareModal();
                 } catch (error) { console.error("Erro ao gerar DOCX:", error); showNotification('Falha ao gerar o Word.', true);
-                } finally { btn.disabled = false; btn.innerHTML = originalText; }
+                } finally { btn.disabled = false; btn.innerHTML = originalHTML; }
             }
         };
 
@@ -243,12 +249,11 @@
 
         function showShareModal() {
             const shareBtn = document.getElementById('share-file-btn');
-            const shareModal = document.getElementById('share-modal');
             if (navigator.share && navigator.canShare) {
                 const fileToShare = new File([generatedBlob], generatedFileName, { type: generatedBlob.type });
                  if (navigator.canShare({ files: [fileToShare] })) { shareBtn.classList.remove('hidden'); }
             } else { shareBtn.classList.add('hidden'); }
-            openModal(shareModal);
+            openModal(document.getElementById('share-modal'));
         }
 
         function setupEventListeners() {
@@ -259,13 +264,9 @@
             document.getElementById('export-pdf-btn').addEventListener('click', e => actions.pdf(e.currentTarget));
             document.getElementById('export-docx-btn').addEventListener('click', e => actions.docx(e.currentTarget));
 
-            // Lógica do novo FAB
             const fabContainer = document.getElementById('fab-container');
             const fab = document.getElementById('fab');
-            fab.addEventListener('click', () => {
-                fabContainer.classList.toggle('open');
-            });
-
+            fab.addEventListener('click', (e) => { e.stopPropagation(); fabContainer.classList.toggle('open'); });
             document.getElementById('fab-menu').addEventListener('click', e => {
                 const target = e.target.closest('.fab-menu-item');
                 if (target) {
@@ -276,10 +277,7 @@
             });
             
             document.getElementById('settings-btn').addEventListener('click', () => openModal(document.getElementById('settings-modal')));
-            document.querySelectorAll('[id^="close-"]').forEach(btn => {
-                const modal = btn.closest('.fixed');
-                if(modal) btn.addEventListener('click', () => closeModal(modal));
-            });
+            document.querySelectorAll('[id^="close-"]').forEach(btn => { const modal = btn.closest('.fixed'); if(modal) btn.addEventListener('click', () => closeModal(modal)); });
 
             document.getElementById('download-file-btn').addEventListener('click', () => { saveAs(generatedBlob, generatedFileName); closeModal(document.getElementById('share-modal')); });
             document.getElementById('share-file-btn').addEventListener('click', async () => {
@@ -288,13 +286,7 @@
                 } catch (error) { if (error.name !== 'AbortError') { console.error('Erro ao compartilhar:', error); showNotification('Não foi possível compartilhar o arquivo.', true); }
                 } finally { closeModal(document.getElementById('share-modal')); }
             });
-
-            // Fechar o menu FAB se clicar fora
-            document.addEventListener('click', (e) => {
-                if (fabContainer.classList.contains('open') && !fabContainer.contains(e.target)) {
-                    fabContainer.classList.remove('open');
-                }
-            });
+            document.addEventListener('click', (e) => { if (fabContainer.classList.contains('open') && !fabContainer.contains(e.target)) { fabContainer.classList.remove('open'); } });
         }
         
         document.addEventListener('DOMContentLoaded', () => { setupEventListeners(); actions.load(); });
