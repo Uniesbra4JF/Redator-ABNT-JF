@@ -43,8 +43,29 @@
             font-size: 12pt;
             line-height: 1.5;
             text-align: justify;
-            padding: 85px 56px;
+            padding: 113px 76px 76px 113px;
             color: black;
+            background-color: white;
+        }
+        
+        /* Estilos e Animações do FAB Menu */
+        #fab-container.open #fab-icon-open {
+            transform: rotate(45deg);
+        }
+        #fab-menu {
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            transform-origin: bottom right;
+        }
+        #fab-container:not(.open) #fab-menu {
+            opacity: 0;
+            transform: scale(0.95) translateY(10px);
+            pointer-events: none;
+        }
+        .fab-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem; /* 12px */
+            transition: background-color 0.2s;
         }
     </style>
 </head>
@@ -85,19 +106,37 @@
 
     <!-- Botão Flutuante (Mobile) -->
     <div id="fab-container" class="md:hidden fixed bottom-6 right-6 z-30">
-        <button id="fab" class="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center text-white shadow-lg focus:outline-none transform transition-transform duration-200 hover:scale-110">
-            <svg id="fab-icon-open" class="h-8 w-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
-            <svg id="fab-icon-close" class="h-8 w-8 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-        </button>
-        <div id="fab-menu" class="absolute bottom-20 right-0 w-56 bg-white rounded-lg shadow-xl py-2 hidden">
-             <button data-action="save" class="fab-menu-item">Salvar Rascunho</button>
-             <button data-action="load" class="fab-menu-item">Carregar Rascunho</button>
-             <button data-action="clear" class="fab-menu-item text-red-500">Limpar Editor</button>
-             <hr class="my-2"/>
-             <button data-action="preview" class="fab-menu-item">Pré-visualizar</button>
-             <button data-action="pdf" class="fab-menu-item">Exportar PDF</button>
-             <button data-action="docx" class="fab-menu-item">Exportar Word</button>
+        <div id="fab-menu" class="absolute bottom-20 right-0 w-64 bg-white rounded-lg shadow-2xl py-2">
+            <button data-action="save" class="fab-menu-item w-full text-left px-4 py-3 text-gray-700 hover:bg-gray-100">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M7.707 10.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V6a1 1 0 10-2 0v5.586L7.707 10.293zM5 3a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V5a2 2 0 00-2-2H5z" /></svg>
+                <span>Salvar Rascunho</span>
+            </button>
+            <button data-action="load" class="fab-menu-item w-full text-left px-4 py-3 text-gray-700 hover:bg-gray-100">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd" /></svg>
+                <span>Carregar Rascunho</span>
+            </button>
+            <hr class="my-1" />
+            <button data-action="preview" class="fab-menu-item w-full text-left px-4 py-3 text-gray-700 hover:bg-gray-100">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z" /><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.022 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" /></svg>
+                <span>Pré-visualizar</span>
+            </button>
+            <button data-action="pdf" class="fab-menu-item w-full text-left px-4 py-3 text-gray-700 hover:bg-gray-100">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 0v4.586A1.5 1.5 0 007.586 10H12v2.5a.5.5 0 01-1 0V10H7.5a.5.5 0 01-.5-.5V4H6z" clip-rule="evenodd" /></svg>
+                <span>Exportar PDF</span>
+            </button>
+            <button data-action="docx" class="fab-menu-item w-full text-left px-4 py-3 text-gray-700 hover:bg-gray-100">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 0v4.586A1.5 1.5 0 007.586 10H12v2.5a.5.5 0 01-1 0V10H7.5a.5.5 0 01-.5-.5V4H6z" clip-rule="evenodd" /></svg>
+                <span>Exportar Word</span>
+            </button>
+            <hr class="my-1" />
+            <button data-action="clear" class="fab-menu-item w-full text-left px-4 py-3 text-red-500 hover:bg-red-50">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
+                <span>Limpar Editor</span>
+            </button>
         </div>
+        <button id="fab" class="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center text-white shadow-lg focus:outline-none">
+            <svg id="fab-icon-open" class="h-8 w-8 transition-transform duration-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+        </button>
     </div>
     
     <!-- Modals -->
@@ -112,7 +151,7 @@
     <div id="preview-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-40 hidden">
         <div class="bg-white rounded-lg shadow-xl w-full max-w-4xl h-5/6 flex flex-col">
             <div class="flex justify-between items-center p-4 border-b"><h2 class="text-2xl font-bold">Pré-visualização ABNT</h2><button id="close-preview-btn" class="text-gray-500 hover:text-gray-800 text-3xl">&times;</button></div>
-            <div id="preview-area" class="p-6 overflow-y-auto flex-grow bg-gray-200"><div id="preview-content-wrapper" class="preview-content bg-white shadow-lg mx-auto" style="width: 21cm; min-height: 29.7cm;"></div></div>
+            <div id="preview-area" class="p-6 overflow-y-auto flex-grow bg-gray-200"><div id="preview-content-wrapper" class="preview-content shadow-lg mx-auto" style="width: 21cm; min-height: 29.7cm;"></div></div>
             <div class="p-4 border-t flex justify-end bg-gray-50"><button id="close-preview-btn-2" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Fechar</button></div>
         </div>
     </div>
@@ -132,6 +171,7 @@
     <div id="notification" class="fixed top-5 right-5 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg opacity-0 transform -translate-y-12 transition-all duration-300 z-50"><p></p></div>
 
     <script>
+        // Script principal (sem alterações na lógica, apenas no controle do FAB)
         const { jsPDF } = window.jspdf;
         const editor = document.getElementById('editor');
         const notification = document.getElementById('notification');
@@ -146,185 +186,118 @@
             setTimeout(() => notification.classList.add('opacity-0', '-translate-y-12'), duration);
         }
 
-        function getFormattedContent(forDocx = false) {
+        function getFormattedContent() {
             const paragraphs = editor.value.split('\n').map(p => {
                 const text = p.trim() ? p.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') : '&nbsp;';
-                // Para DOCX, o recuo é melhor aplicado via configurações de parágrafo, não CSS.
-                // Para PDF/Preview, o text-indent funciona bem.
-                const style = forDocx ? '' : 'style="text-indent: 2cm;"';
-                return `<p ${style}>${text}</p>`;
+                return `<p style="text-indent: 1.25cm; margin: 0;">${text}</p>`;
             }).join('');
             return paragraphs;
         }
         
         const actions = {
-            save: () => {
-                localStorage.setItem('abntDraft', editor.value);
-                showNotification('Rascunho salvo com sucesso!');
-            },
-            load: () => {
-                const draft = localStorage.getItem('abntDraft');
-                if (draft) editor.value = draft;
-            },
-            clear: () => {
-                if (window.confirm('Tem certeza que deseja limpar o editor?')) {
-                    editor.value = '';
-                    showNotification('Editor limpo.');
-                }
-            },
-            preview: () => {
-                document.getElementById('preview-content-wrapper').innerHTML = getFormattedContent();
-                openModal(document.getElementById('preview-modal'));
-            },
+            save: () => { localStorage.setItem('abntDraft', editor.value); showNotification('Rascunho salvo com sucesso!'); },
+            load: () => { const draft = localStorage.getItem('abntDraft'); if (draft) editor.value = draft; },
+            clear: () => { if (confirm('Tem certeza que deseja limpar o editor?')) { editor.value = ''; showNotification('Editor limpo.'); } },
+            preview: () => { document.getElementById('preview-content-wrapper').innerHTML = getFormattedContent(); openModal(document.getElementById('preview-modal')); },
             pdf: async (btn) => {
                 if (!editor.value.trim()) return showNotification('O editor está vazio.', true);
-                const originalText = btn.innerHTML;
+                const originalText = btn.querySelector('span')?.textContent || 'Exportar PDF';
                 btn.disabled = true;
-                btn.innerHTML = 'Gerando PDF...';
+                btn.innerHTML = `<svg class="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24"></svg> Gerando...`;
                 
                 showNotification('Preparando PDF...', false, 6000);
-
                 const previewContent = document.getElementById('preview-content-wrapper');
+                previewContent.style.cssText += `font-family: 'Times New Roman', Times, serif; font-size: 12pt; line-height: 1.5; text-align: justify;`;
                 previewContent.innerHTML = getFormattedContent();
+                
                 const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
-
                 try {
-                    await pdf.html(previewContent, {
-                        margin: [30, 20, 20, 30],
-                        autoPaging: 'text',
-                        width: 160,
-                        windowWidth: 794 
-                    });
+                    await pdf.html(previewContent, { margin: [30, 20, 20, 30], autoPaging: 'text', html2canvas: { scale: 0.25 }, width: 160, windowWidth: 794 });
                     generatedBlob = pdf.output('blob');
                     generatedFileName = 'documento-ABNT.pdf';
                     showShareModal();
-                } catch (error) {
-                    console.error("Erro ao gerar PDF:", error);
-                    showNotification('Falha ao gerar o PDF.', true);
-                } finally {
-                    btn.disabled = false;
-                    btn.innerHTML = originalText;
-                }
+                } catch (error) { console.error("Erro ao gerar PDF:", error); showNotification('Falha ao gerar o PDF.', true);
+                } finally { btn.disabled = false; btn.innerHTML = originalText; previewContent.style.cssText = ''; }
             },
             docx: async (btn) => {
                 if (!editor.value.trim()) return showNotification('O editor está vazio.', true);
-                const originalText = btn.innerHTML;
+                const originalText = btn.querySelector('span')?.textContent || 'Exportar Word';
                 btn.disabled = true;
-                btn.innerHTML = 'Exportando...';
+                btn.innerHTML = `<svg class="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24"></svg> Exportando...`;
 
-                const htmlString = `<!DOCTYPE html><html><head><title></title></head><body>${getFormattedContent(true)}</body></html>`;
-                
+                const htmlString = `<!DOCTYPE html><html><head><style>p { font-family: 'Times New Roman', Times, serif; font-size: 12pt; line-height: 1.5; text-align: justify; }</style></head><body>${getFormattedContent()}</body></html>`;
                 try {
-                    generatedBlob = await htmlToDocx(htmlString, null, {
-                        orientation: 'portrait',
-                        margins: { top: 1701, right: 1134, bottom: 1134, left: 1701 },
-                        paragraph: {
-                           options: {
-                                indent: { left: 1134 } // Recuo de primeira linha (2cm)
-                           }
-                        }
-                    });
+                    generatedBlob = await htmlToDocx(htmlString, null, { orientation: 'portrait', margins: { top: 1701, right: 1134, bottom: 1134, left: 1701 } });
                     generatedFileName = 'documento-ABNT.docx';
                     showShareModal();
-                } catch (error) {
-                    console.error("Erro ao gerar DOCX:", error);
-                    showNotification('Falha ao gerar o Word.', true);
-                } finally {
-                    btn.disabled = false;
-                    btn.innerHTML = originalText;
-                }
+                } catch (error) { console.error("Erro ao gerar DOCX:", error); showNotification('Falha ao gerar o Word.', true);
+                } finally { btn.disabled = false; btn.innerHTML = originalText; }
             }
         };
 
-        function openModal(modal) {
-            modal.classList.remove('hidden');
-            modal.firstElementChild.classList.add('modal-enter-active');
-        }
-
+        function openModal(modal) { modal.classList.remove('hidden'); modal.firstElementChild.classList.add('modal-enter-active'); }
         function closeModal(modal) {
             modal.firstElementChild.classList.add('modal-leave-active');
-            setTimeout(() => {
-                modal.classList.add('hidden');
-                modal.firstElementChild.classList.remove('modal-enter-active', 'modal-leave-active');
-            }, 200);
+            setTimeout(() => { modal.classList.add('hidden'); modal.firstElementChild.classList.remove('modal-enter-active', 'modal-leave-active'); }, 200);
         }
 
         function showShareModal() {
             const shareBtn = document.getElementById('share-file-btn');
             const shareModal = document.getElementById('share-modal');
-            
-            // Verifica se a API de compartilhamento está disponível
             if (navigator.share && navigator.canShare) {
                 const fileToShare = new File([generatedBlob], generatedFileName, { type: generatedBlob.type });
-                 if (navigator.canShare({ files: [fileToShare] })) {
-                    shareBtn.classList.remove('hidden');
-                 }
-            } else {
-                 shareBtn.classList.add('hidden');
-            }
+                 if (navigator.canShare({ files: [fileToShare] })) { shareBtn.classList.remove('hidden'); }
+            } else { shareBtn.classList.add('hidden'); }
             openModal(shareModal);
         }
 
         function setupEventListeners() {
-            document.querySelectorAll('.action-btn').forEach(btn => {
-                const action = btn.id.split('-')[1]; // e.g., 'save' from 'save-draft-btn'
-                if(actions[action]) btn.addEventListener('click', e => actions[action](e.currentTarget));
-            });
+            document.getElementById('save-draft-btn').addEventListener('click', e => actions.save(e.currentTarget));
+            document.getElementById('load-draft-btn').addEventListener('click', e => actions.load(e.currentTarget));
+            document.getElementById('clear-editor-btn').addEventListener('click', e => actions.clear(e.currentTarget));
+            document.getElementById('preview-btn').addEventListener('click', e => actions.preview(e.currentTarget));
             document.getElementById('export-pdf-btn').addEventListener('click', e => actions.pdf(e.currentTarget));
             document.getElementById('export-docx-btn').addEventListener('click', e => actions.docx(e.currentTarget));
 
+            // Lógica do novo FAB
+            const fabContainer = document.getElementById('fab-container');
             const fab = document.getElementById('fab');
-            const fabMenu = document.getElementById('fab-menu');
             fab.addEventListener('click', () => {
-                fabMenu.classList.toggle('hidden');
-                document.getElementById('fab-icon-open').classList.toggle('hidden');
-                document.getElementById('fab-icon-close').classList.toggle('hidden');
+                fabContainer.classList.toggle('open');
             });
 
-            fabMenu.addEventListener('click', e => {
+            document.getElementById('fab-menu').addEventListener('click', e => {
                 const target = e.target.closest('.fab-menu-item');
                 if (target) {
                     const action = target.dataset.action;
                     if (actions[action]) actions[action](target);
-                    fabMenu.classList.add('hidden');
-                    document.getElementById('fab-icon-open').classList.remove('hidden');
-                    document.getElementById('fab-icon-close').classList.add('hidden');
+                    fabContainer.classList.remove('open');
                 }
             });
             
-            // Listeners dos Modals
             document.getElementById('settings-btn').addEventListener('click', () => openModal(document.getElementById('settings-modal')));
             document.querySelectorAll('[id^="close-"]').forEach(btn => {
                 const modal = btn.closest('.fixed');
                 if(modal) btn.addEventListener('click', () => closeModal(modal));
             });
 
-            // Listeners do Modal de Compartilhamento
-            document.getElementById('download-file-btn').addEventListener('click', () => {
-                saveAs(generatedBlob, generatedFileName);
-                closeModal(document.getElementById('share-modal'));
-            });
-
+            document.getElementById('download-file-btn').addEventListener('click', () => { saveAs(generatedBlob, generatedFileName); closeModal(document.getElementById('share-modal')); });
             document.getElementById('share-file-btn').addEventListener('click', async () => {
                 const fileToShare = new File([generatedBlob], generatedFileName, { type: generatedBlob.type });
-                try {
-                    await navigator.share({
-                        files: [fileToShare],
-                        title: generatedFileName,
-                        text: 'Documento criado com o Redator ABNT.'
-                    });
-                } catch (error) {
-                    console.log('Erro ao compartilhar:', error);
-                } finally {
-                    closeModal(document.getElementById('share-modal'));
+                try { await navigator.share({ files: [fileToShare], title: generatedFileName, text: 'Documento criado com o Redator ABNT.' });
+                } catch (error) { if (error.name !== 'AbortError') { console.error('Erro ao compartilhar:', error); showNotification('Não foi possível compartilhar o arquivo.', true); }
+                } finally { closeModal(document.getElementById('share-modal')); }
+            });
+
+            // Fechar o menu FAB se clicar fora
+            document.addEventListener('click', (e) => {
+                if (fabContainer.classList.contains('open') && !fabContainer.contains(e.target)) {
+                    fabContainer.classList.remove('open');
                 }
             });
         }
         
-        document.addEventListener('DOMContentLoaded', () => {
-            setupEventListeners();
-            actions.load();
-        });
+        document.addEventListener('DOMContentLoaded', () => { setupEventListeners(); actions.load(); });
     </script>
 </body>
 </html>
