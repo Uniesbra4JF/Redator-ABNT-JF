@@ -220,7 +220,7 @@
                             const FONT_PT_TO_MM = 0.352778;
                             ABNT.LINE_HEIGHT_MM = (ABNT.FONT_SIZE * FONT_PT_TO_MM) * ABNT.LINE_SPACING;
 
-                            doc.setFont("Helvetica", "normal"); // Fonte padrão jsPDF (similar ao Arial)
+                            doc.setFont("Helvetica", "normal");
                             doc.setFontSize(ABNT.FONT_SIZE);
 
                             let cursorY = ABNT.TOP_MARGIN;
@@ -241,35 +241,45 @@
                                 }
 
                                 const words = paragraph.split(/\s+/);
-                                let lines = [];
                                 let currentLine = '';
                                 let isFirstLineOfPara = true;
 
-                                for(let i = 0; i < words.length; i++) {
-                                    let word = words[i];
-                                    let lineWithNextWord = currentLine ? `${currentLine} ${word}` : word;
-                                    let availableWidth = isFirstLineOfPara ? PAGE.PRINTABLE_WIDTH - ABNT.PARAGRAPH_INDENT : PAGE.PRINTABLE_WIDTH;
-                                    
-                                    if (doc.getTextWidth(lineWithNextWord) <= availableWidth) {
-                                        currentLine = lineWithNextWord;
-                                    } else {
-                                        lines.push(currentLine);
+                                for (let i = 0; i < words.length; i++) {
+                                    const word = words[i];
+                                    const testLine = currentLine ? `${currentLine} ${word}` : word;
+                                    const availableWidth = isFirstLineOfPara ? PAGE.PRINTABLE_WIDTH - ABNT.PARAGRAPH_INDENT : PAGE.PRINTABLE_WIDTH;
+
+                                    if (doc.getTextWidth(testLine) > availableWidth) {
+                                        addPageIfNeeded();
+                                        const x = isFirstLineOfPara ? ABNT.LEFT_MARGIN + ABNT.PARAGRAPH_INDENT : ABNT.LEFT_MARGIN;
+                                        
+                                        const lineWords = currentLine.split(' ');
+                                        if (lineWords.length > 1) {
+                                            const totalWordWidth = doc.getTextWidth(lineWords.join(''));
+                                            const totalSpace = availableWidth - totalWordWidth;
+                                            const spaceWidth = totalSpace / (lineWords.length - 1);
+                                            
+                                            let currentX = x;
+                                            lineWords.forEach(w => {
+                                                doc.text(w, currentX, cursorY);
+                                                currentX += doc.getTextWidth(w) + spaceWidth;
+                                            });
+                                        } else {
+                                            doc.text(currentLine, x, cursorY);
+                                        }
+                                        
+                                        cursorY += ABNT.LINE_HEIGHT_MM;
                                         currentLine = word;
                                         isFirstLineOfPara = false;
+                                    } else {
+                                        currentLine = testLine;
                                     }
                                 }
-                                lines.push(currentLine);
-
-                                for (let i = 0; i < lines.length; i++) {
+                                
+                                if (currentLine) {
                                     addPageIfNeeded();
-                                    const line = lines[i];
-                                    const isFirstLine = i === 0;
-                                    const isLastLine = i === lines.length - 1;
-                                    const xOffset = isFirstLine ? ABNT.LEFT_MARGIN + ABNT.PARAGRAPH_INDENT : ABNT.LEFT_MARGIN;
-                                    const renderWidth = isFirstLine ? PAGE.PRINTABLE_WIDTH - ABNT.PARAGRAPH_INDENT : PAGE.PRINTABLE_WIDTH;
-                                    const alignment = isLastLine ? 'left' : 'justify';
-                                    
-                                    doc.text(line, xOffset, cursorY, { align: alignment, maxWidth: renderWidth });
+                                    const x = isFirstLineOfPara ? ABNT.LEFT_MARGIN + ABNT.PARAGRAPH_INDENT : ABNT.LEFT_MARGIN;
+                                    doc.text(currentLine, x, cursorY);
                                     cursorY += ABNT.LINE_HEIGHT_MM;
                                 }
                             }
@@ -294,37 +304,19 @@
 
                             const paragraphs = this.ui.editor.value.split('\n').map(text => {
                                 return new Paragraph({
-                                    children: [new TextRun(text)],
-                                    style: "abntStyle",
+                                    children: [new TextRun({ text: text, font: "Arial", size: 24 })], // 12pt * 2
+                                    alignment: AlignmentType.JUSTIFIED,
+                                    spacing: { line: 360 }, // 1.5
+                                    indent: { firstLine: 709 }, // 1.25cm
                                 });
                             });
 
                             const doc = new Document({
-                                styles: {
-                                    paragraphStyles: [{
-                                        id: "abntStyle",
-                                        name: "ABNT Style",
-                                        basedOn: "Normal",
-                                        next: "Normal",
-                                        run: {
-                                            font: "Arial",
-                                            size: 24, // 12pt
-                                        },
-                                        paragraph: {
-                                            alignment: AlignmentType.JUSTIFIED,
-                                            spacing: { line: 360 }, // 1.5
-                                            indent: { firstLine: 709 }, // 1.25cm
-                                        },
-                                    }],
-                                },
                                 sections: [{
                                     properties: {
                                         page: {
                                             margin: {
-                                                top: 1701,    // 3cm
-                                                right: 1134,  // 2cm
-                                                bottom: 1134, // 2cm
-                                                left: 1701,   // 3cm
+                                                top: 1701, right: 1134, bottom: 1134, left: 1701,
                                             },
                                         },
                                     },
@@ -394,7 +386,7 @@
             fabToggle.addEventListener('click', (e) => {
                 e.stopPropagation();
                 fabContainer.classList.toggle('open');
-});
+            });
             document.addEventListener('click', (e) => {
                 if (fabContainer.classList.contains('open') && !fabContainer.contains(e.target)) {
                     fabContainer.classList.remove('open');
