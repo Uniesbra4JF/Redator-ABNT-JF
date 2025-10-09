@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Redator ABNT (Correção de Save)</title>
+    <title>Redator ABNT (Save Confiável)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Bibliotecas para Exportação -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -112,7 +112,6 @@
         <div class="w-full h-full flex-1 flex flex-col">
             <textarea id="editor" class="w-full h-full flex-grow border-2 rounded-lg leading-relaxed focus:ring-2 focus:ring-blue-500" placeholder="Comece a digitar sua redação aqui..."></textarea>
             <div id="status-bar" class="text-sm mt-2 px-2 text-gray-500 dark:text-gray-400 flex justify-end items-center gap-4">
-                <span id="save-status" class="transition-opacity duration-500 opacity-0 italic"></span>
                 <span id="word-count">0 palavras</span> | <span id="char-count">0 caracteres</span>
             </div>
         </div>
@@ -170,7 +169,6 @@
                     statusBar: {
                         wordCount: document.getElementById('word-count'),
                         charCount: document.getElementById('char-count'),
-                        saveStatus: document.getElementById('save-status'),
                     },
                     modals: {
                         preview: document.getElementById('preview-modal'),
@@ -184,11 +182,9 @@
                     generatedBlob: null,
                     generatedFileName: '',
                     currentTheme: 'light',
-                    autoSaveTimeout: null,
                 },
                 config: {
                     spinner: `<svg class="animate-spin h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>`,
-                    autoSaveDelay: 1000, // Salva 1 segundo após o usuário parar de digitar
                 },
 
                 init() {
@@ -200,20 +196,9 @@
                 bindEvents() {
                     document.body.addEventListener('click', this.handleAction.bind(this));
                     
-                    const debounce = (func, delay) => {
-                        let timeout;
-                        return function(...args) {
-                            const context = this;
-                            clearTimeout(timeout);
-                            timeout = setTimeout(() => func.apply(context, args), delay);
-                        };
-                    };
-
-                    const debouncedAutoSave = debounce(this.actions.autoSave, this.config.autoSaveDelay);
-
                     this.ui.editor.addEventListener('input', () => {
                         this.updateWordCount();
-                        debouncedAutoSave();
+                        this.actions.save(); // Salva a cada tecla pressionada
                     });
 
                      document.addEventListener('click', (e) => {
@@ -226,9 +211,6 @@
                         e.stopPropagation();
                         this.ui.fabContainer.classList.toggle('open');
                     });
-                    
-                    // Salva o texto ao sair/atualizar a página
-                    window.addEventListener('beforeunload', this.actions.saveBeforeUnload.bind(this));
                 },
 
                 updateWordCount() {
@@ -249,48 +231,22 @@
                         if (target.closest('#fab-menu')) {
                            this.ui.fabContainer.classList.remove('open');
                         }
+                        // O botão de salvar agora só dá feedback visual, a lógica de salvar já acontece no 'input'
+                        if (action === 'save') {
+                            this.utils.showNotification('Rascunho salvo com sucesso!');
+                            return;
+                        }
                         await this.actions[action].call(this, target);
                     }
                 },
 
                 actions: {
-                    saveBeforeUnload() {
-                        // Salva de forma síncrona, sem UI, para garantir que funcione ao sair
-                        if (this.ui.editor.value) {
-                           localStorage.setItem('abntDraft', this.ui.editor.value);
-                        }
-                    },
-                    autoSave() {
-                        const app = AbntEditorApp;
-                        const statusEl = app.ui.statusBar.saveStatus;
-
-                        statusEl.textContent = 'Salvando...';
-                        statusEl.classList.remove('opacity-0', 'text-green-500', 'text-red-500');
-
-                        try {
-                            localStorage.setItem('abntDraft', app.ui.editor.value);
-                            setTimeout(() => {
-                                statusEl.textContent = 'Salvo!';
-                                statusEl.classList.add('text-green-500');
-                                
-                                if(app.state.autoSaveTimeout) clearTimeout(app.state.autoSaveTimeout);
-                                app.state.autoSaveTimeout = setTimeout(() => {
-                                    statusEl.classList.add('opacity-0');
-                                }, 2000);
-                            }, 200);
-                        } catch (error) {
-                            console.error("Erro no salvamento automático:", error);
-                            statusEl.textContent = 'Erro ao salvar!';
-                            statusEl.classList.add('text-red-500');
-                        }
-                    },
                     save() {
                         try {
                             localStorage.setItem('abntDraft', this.ui.editor.value);
-                            this.utils.showNotification('Rascunho salvo com sucesso!');
                         } catch (error) {
                             console.error("Erro ao salvar rascunho:", error);
-                            this.utils.showNotification('Falha ao salvar o rascunho.', true);
+                            // Pode-se adicionar um feedback visual de erro aqui se necessário
                         }
                     },
                     load() {
@@ -374,8 +330,7 @@
 
                                 for (let i = 0; i < allWords.length; i++) {
                                     const word = allWords[i];
-                                    const currentLineText = lineWords.join(' ');
-                                    const testLineText = lineWords.length > 0 ? `${currentLineText} ${word}` : word;
+                                    const testLineText = lineWords.length > 0 ? `${lineWords.join(' ')} ${word}` : word;
                                     const availableWidth = PAGE.PRINTABLE_WIDTH - (isFirstLineOfPara ? ABNT.PARAGRAPH_INDENT : 0);
 
                                     if (doc.getTextWidth(testLineText) <= availableWidth) {
@@ -385,7 +340,7 @@
                                         cursorY += ABNT.LINE_HEIGHT_MM;
                                         isFirstLineOfPara = false;
                                         lineWords = [word];
-                                        if (cursorY > PAGE.HEIGHT - ABNT.BOTTOM_MARGIN) {
+                                        if (cursorY > PAGE.HEIGHT - ABNT.BOTTOM_MARGIN - ABNT.LINE_HEIGHT_MM) {
                                             doc.addPage();
                                             cursorY = ABNT.TOP_MARGIN;
                                         }
