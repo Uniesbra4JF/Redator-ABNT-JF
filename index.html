@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" class="">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Redator ABNT</title>
+    <title>Redator ABNT Aprimorado</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,16 +12,37 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://unpkg.com/docx@8.5.0/build/index.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <script>
+        // Configuração do Tailwind para o modo escuro
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
     <style>
-        html, body { height: 100%; }
+        :root {
+            --bg-primary: #f0f2f5;
+            --bg-secondary: #ffffff;
+            --text-primary: #1f2937;
+            --text-secondary: #4b5563;
+            --border-color: #e5e7eb;
+        }
+        html.dark {
+            --bg-primary: #111827;
+            --bg-secondary: #1f2937;
+            --text-primary: #f9fafb;
+            --text-secondary: #d1d5db;
+            --border-color: #374151;
+        }
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f0f2f5;
-            display: flex;
-            flex-direction: column;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
-        main { flex-grow: 1; }
         #editor {
+            background-color: var(--bg-secondary);
+            border-color: var(--border-color);
+            color: var(--text-primary);
             resize: none;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
             transition: all 0.3s ease;
@@ -34,20 +55,17 @@
             border-color: #3b82f6;
             outline: none;
         }
-        .modal-enter-active { animation: fadeIn 0.2s ease-out forwards; }
-        .modal-leave-active { animation: fadeOut 0.2s ease-in forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
-        @keyframes fadeOut { from { opacity: 1; transform: scale(1); } to { opacity: 0; transform: scale(0.95); } }
+        .modal-content { transition: opacity 0.2s ease, transform 0.2s ease; }
+        .modal.hidden .modal-content { opacity: 0; transform: scale(0.95); }
         .preview-content {
-            font-family: Arial, sans-serif;
+            font-family: 'Times New Roman', Times, serif;
             font-size: 12pt;
             line-height: 1.5;
             text-align: justify;
-            padding: 113px 76px 76px 113px;
+            padding: 113px 76px 76px 113px; /* Margens ABNT: Sup 3cm, Esq 3cm, Dir 2cm, Inf 2cm */
             color: black;
             background-color: white;
         }
-        
         #fab-container.open #fab-icon-open { transform: rotate(45deg); }
         #fab-menu {
             transition: opacity 0.3s ease, transform 0.3s ease;
@@ -58,63 +76,86 @@
             transform: scale(0.95) translateY(10px);
             pointer-events: none;
         }
-        .fab-menu-item {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            transition: background-color 0.2s;
-        }
         .action-btn {
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 0.5rem;
-            padding: 0.5rem 1rem;
-            border-radius: 0.375rem;
+            padding: 0.625rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
         }
+        .action-btn:disabled { cursor: not-allowed; opacity: 0.7; }
     </style>
 </head>
-<body>
+<body class="flex flex-col min-h-screen">
 
-    <header class="bg-gray-800 text-white shadow-md w-full sticky top-0 z-20">
+    <header class="bg-gray-800 dark:bg-gray-900 text-white shadow-md w-full sticky top-0 z-20">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
                 <div class="flex items-center">
                     <svg class="h-8 w-8 mr-2 text-blue-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v11.494m-5.747-8.494h11.494M4 12a8 8 0 018-8v0a8 8 0 018 8v0a8 8 0 01-8 8v0a8 8 0 01-8-8v0z" /></svg>
                     <h1 class="text-xl font-bold">Redator ABNT</h1>
                 </div>
-                <button data-action="openSettings" class="p-2 rounded-full hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white" title="Configurações"><svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924-1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg></button>
+                <div class="flex items-center gap-2">
+                    <button data-action="toggleTheme" class="p-2 rounded-full hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white" title="Alterar Tema">
+                        <svg id="theme-icon-light" class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                        <svg id="theme-icon-dark" class="h-6 w-6 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
+                    </button>
+                    <button data-action="openSettings" class="p-2 rounded-full hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white" title="Configurações"><svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924-1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg></button>
+                </div>
             </div>
         </div>
     </header>
 
-    <main class="container mx-auto p-4 sm:p-6 lg:p-8 flex flex-col md:flex-row gap-8">
-        <div class="w-full h-full flex-1 flex flex-col"><textarea id="editor" class="w-full h-full flex-grow border-2 border-gray-200 rounded-lg leading-relaxed focus:ring-2 focus:ring-blue-500" placeholder="Comece a digitar sua redação aqui..."></textarea></div>
-        <aside class="hidden md:block w-full md:w-72">
-            <div class="bg-white p-4 rounded-lg shadow-md space-y-3 sticky top-24">
-                <h2 class="font-bold text-lg text-center mb-4">Ações</h2>
+    <main class="container mx-auto p-4 sm:p-6 lg:p-8 flex-grow flex flex-col md:flex-row gap-8">
+        <div class="w-full h-full flex-1 flex flex-col">
+            <textarea id="editor" class="w-full h-full flex-grow border-2 rounded-lg leading-relaxed focus:ring-2 focus:ring-blue-500" placeholder="Comece a digitar sua redação aqui..."></textarea>
+            <div id="status-bar" class="text-sm text-right mt-2 px-2 text-gray-500 dark:text-gray-400">
+                <span id="word-count">0 palavras</span> | <span id="char-count">0 caracteres</span>
+            </div>
+        </div>
+        <aside class="hidden md:block w-full md:w-80">
+            <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md space-y-3 sticky top-24">
+                <h2 class="font-bold text-lg text-center mb-4">Ações Rápidas</h2>
                 <button data-action="save" class="action-btn w-full bg-blue-600 text-white hover:bg-blue-700">Salvar Rascunho</button>
-                <button data-action="load" class="action-btn w-full bg-gray-200 text-gray-800 hover:bg-gray-300">Carregar Rascunho</button>
-                <button data-action="clear" class="action-btn w-full bg-red-500 text-white hover:bg-red-600">Limpar Editor</button>
-                <hr class="my-3"/>
-                <button data-action="preview" class="action-btn w-full bg-green-500 text-white hover:bg-green-600">Pré-visualizar ABNT</button>
-                <button data-action="pdf" class="action-btn w-full bg-gray-800 text-white hover:bg-black">Exportar PDF</button>
-                <button data-action="docx" class="action-btn w-full bg-gray-800 text-white hover:bg-black">Exportar Word</button>
+                <button data-action="load" class="action-btn w-full bg-gray-200 text-gray-800 dark:bg-gray-600 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-500">Carregar Rascunho</button>
+                <button data-action="clear" class="action-btn w-full bg-red-600 text-white hover:bg-red-700">Limpar Editor</button>
+                <hr class="my-3 border-gray-200 dark:border-gray-600"/>
+                <h2 class="font-bold text-lg text-center mb-2">Exportar</h2>
+                <button data-action="preview" class="action-btn w-full bg-green-600 text-white hover:bg-green-700">Pré-visualizar ABNT</button>
+                <button data-action="pdf" class="action-btn w-full bg-gray-800 dark:bg-gray-700 text-white hover:bg-black dark:hover:bg-gray-600">Exportar PDF</button>
+                <button data-action="docx" class="action-btn w-full bg-gray-800 dark:bg-gray-700 text-white hover:bg-black dark:hover:bg-gray-600">Exportar Word (DOCX)</button>
             </div>
         </aside>
     </main>
 
-    <footer class="bg-gray-800 text-white text-center p-4 mt-auto"><p>&copy; 2024 Redator ABNT | Todos os direitos reservados.</p></footer>
+    <footer class="bg-gray-800 dark:bg-gray-900 text-white text-center p-4 mt-auto"><p>&copy; 2024 Redator ABNT | Todos os direitos reservados.</p></footer>
 
+    <!-- Botão Flutuante (FAB) para Mobile -->
     <div id="fab-container" class="md:hidden fixed bottom-6 right-6 z-30">
-        <div id="fab-menu" class="absolute bottom-20 right-0 w-64 bg-white rounded-lg shadow-2xl py-2"><button data-action="save" class="fab-menu-item w-full text-left px-4 py-3 text-gray-700 hover:bg-gray-100"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M7.707 10.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V6a1 1 0 10-2 0v5.586L7.707 10.293zM5 3a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V5a2 2 0 00-2-2H5z" /></svg><span>Salvar Rascunho</span></button><button data-action="load" class="fab-menu-item w-full text-left px-4 py-3 text-gray-700 hover:bg-gray-100"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd" /></svg><span>Carregar Rascunho</span></button><hr class="my-1" /><button data-action="preview" class="fab-menu-item w-full text-left px-4 py-3 text-gray-700 hover:bg-gray-100"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z" /><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.022 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" /></svg><span>Pré-visualizar</span></button><button data-action="pdf" class="fab-menu-item w-full text-left px-4 py-3 text-gray-700 hover:bg-gray-100"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 0v4.586A1.5 1.5 0 007.586 10H12v2.5a.5.5 0 01-1 0V10H7.5a.5.5 0 01-.5-.5V4H6z" clip-rule="evenodd" /></svg><span>Exportar PDF</span></button><button data-action="docx" class="fab-menu-item w-full text-left px-4 py-3 text-gray-700 hover:bg-gray-100"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 0v4.586A1.5 1.5 0 007.586 10H12v2.5a.5.5 0 01-1 0V10H7.5a.5.5 0 01-.5-.5V4H6z" clip-rule="evenodd" /></svg><span>Exportar Word</span></button><hr class="my-1" /><button data-action="clear" class="fab-menu-item w-full text-left px-4 py-3 text-red-500 hover:bg-red-50"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg><span>Limpar Editor</span></button></div>
+        <div id="fab-menu" class="absolute bottom-20 right-0 w-64 bg-white dark:bg-gray-800 rounded-lg shadow-2xl py-2">
+            <!-- Conteúdo do FAB -->
+            <button data-action="save" class="w-full text-left px-4 py-3 flex items-center gap-3 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M7.707 10.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V6a1 1 0 10-2 0v5.586L7.707 10.293zM5 3a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V5a2 2 0 00-2-2H5z" /></svg><span>Salvar</span></button>
+            <button data-action="load" class="w-full text-left px-4 py-3 flex items-center gap-3 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd" /></svg><span>Carregar</span></button>
+            <hr class="my-1 border-gray-200 dark:border-gray-600"/>
+            <button data-action="preview" class="w-full text-left px-4 py-3 flex items-center gap-3 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z" /><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.022 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" /></svg><span>Pré-visualizar</span></button>
+            <button data-action="pdf" class="w-full text-left px-4 py-3 flex items-center gap-3 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 0v4.586A1.5 1.5 0 007.586 10H12v2.5a.5.5 0 01-1 0V10H7.5a.5.5 0 01-.5-.5V4H6z" clip-rule="evenodd" /></svg><span>Exportar PDF</span></button>
+            <button data-action="docx" class="w-full text-left px-4 py-3 flex items-center gap-3 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 0v4.586A1.5 1.5 0 007.586 10H12v2.5a.5.5 0 01-1 0V10H7.5a.5.5 0 01-.5-.5V4H6z" clip-rule="evenodd" /></svg><span>Exportar Word</span></button>
+            <hr class="my-1 border-gray-200 dark:border-gray-600"/>
+            <button data-action="clear" class="w-full text-left px-4 py-3 flex items-center gap-3 text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg><span>Limpar Editor</span></button>
+        </div>
         <button id="fab-toggle" class="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center text-white shadow-lg focus:outline-none"><svg id="fab-icon-open" class="h-8 w-8 transition-transform duration-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg></button>
     </div>
     
-    <div id="settings-modal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-40 hidden"><div class="bg-white rounded-lg shadow-xl w-full max-w-md p-6"><div class="flex justify-between items-center mb-4"><h2 class="text-2xl font-bold">Configurações ABNT</h2><button data-action="closeModal" class="text-gray-500 hover:text-gray-800 text-3xl">&times;</button></div><p class="text-gray-600">Funcionalidade em desenvolvimento.</p><div class="mt-6 flex justify-end"><button data-action="closeModal" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Fechar</button></div></div></div>
-    <div id="preview-modal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-40 hidden"><div class="bg-white rounded-lg shadow-xl w-full max-w-4xl h-5/6 flex flex-col"><div class="flex justify-between items-center p-4 border-b"><h2 class="text-2xl font-bold">Pré-visualização ABNT</h2><button data-action="closeModal" class="text-gray-500 hover:text-gray-800 text-3xl">&times;</button></div><div id="preview-area" class="p-6 overflow-y-auto flex-grow bg-gray-200"><div id="preview-content-wrapper" class="preview-content shadow-lg mx-auto" style="width: 21cm; min-height: 29.7cm;"></div></div><div class="p-4 border-t flex justify-end bg-gray-50"><button data-action="closeModal" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Fechar</button></div></div></div>
-    <div id="share-modal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden"><div class="bg-white rounded-lg shadow-xl w-full max-w-sm p-6 text-center"><h2 class="text-2xl font-bold mb-2">Arquivo Gerado!</h2><p class="text-gray-600 mb-6">Seu documento está pronto. O que você gostaria de fazer?</p><div class="flex flex-col space-y-3"><button data-action="download" class="action-btn w-full bg-blue-600 text-white hover:bg-blue-700">Baixar Arquivo</button><button data-action="share" class="action-btn w-full bg-green-500 text-white hover:bg-green-600 hidden">Compartilhar</button><button data-action="closeModal" class="mt-4 text-gray-600 hover:text-gray-800">Fechar</button></div></div></div>
-    <div id="notification" class="fixed top-5 right-5 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg opacity-0 transform -translate-y-12 transition-all duration-300 z-50"><p></p></div>
+    <!-- Modais -->
+    <div id="settings-modal" class="modal fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-40 hidden"><div class="modal-content bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md p-6"><div class="flex justify-between items-center mb-4"><h2 class="text-2xl font-bold">Configurações ABNT</h2><button data-action="closeModal" class="text-gray-500 hover:text-gray-800 text-3xl">&times;</button></div><p class="text-gray-600 dark:text-gray-300">Funcionalidade em desenvolvimento.</p><div class="mt-6 flex justify-end"><button data-action="closeModal" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Fechar</button></div></div></div>
+    <div id="preview-modal" class="modal fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-40 hidden"><div class="modal-content bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-4xl h-5/6 flex flex-col"><div class="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700"><h2 class="text-2xl font-bold">Pré-visualização ABNT</h2><button data-action="closeModal" class="text-gray-500 hover:text-gray-800 text-3xl">&times;</button></div><div id="preview-area" class="p-6 overflow-y-auto flex-grow bg-gray-200 dark:bg-gray-900"><div id="preview-content-wrapper" class="preview-content shadow-lg mx-auto" style="width: 21cm; min-height: 29.7cm;"></div></div><div class="p-4 border-t border-gray-200 dark:border-gray-700 flex justify-end bg-gray-50 dark:bg-gray-800"><button data-action="closeModal" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Fechar</button></div></div></div>
+    <div id="share-modal" class="modal fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50 hidden"><div class="modal-content bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-sm p-6 text-center"><h2 class="text-2xl font-bold mb-2">Arquivo Gerado!</h2><p class="text-gray-600 dark:text-gray-300 mb-6">Seu documento está pronto. O que você gostaria de fazer?</p><div class="flex flex-col space-y-3"><button data-action="download" class="action-btn w-full bg-blue-600 text-white hover:bg-blue-700">Baixar Arquivo</button><button data-action="share" class="action-btn w-full bg-green-500 text-white hover:bg-green-600 hidden">Compartilhar</button><button data-action="closeModal" class="mt-4 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white">Fechar</button></div></div></div>
+    <div id="confirm-clear-modal" class="modal fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50 hidden"><div class="modal-content bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-sm p-6 text-center"><h2 class="text-xl font-bold mb-2">Confirmar Limpeza</h2><p class="text-gray-600 dark:text-gray-300 mb-6">Tem certeza de que deseja apagar todo o conteúdo do editor? Esta ação não pode ser desfeita.</p><div class="flex justify-center gap-4"><button data-action="cancelClear" class="px-6 py-2 bg-gray-200 text-gray-800 dark:bg-gray-600 dark:text-white rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500">Cancelar</button><button data-action="confirmClear" class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">Limpar</button></div></div></div>
+    
+    <div id="notification" class="fixed top-5 right-5 text-white px-6 py-3 rounded-lg shadow-lg opacity-0 transform -translate-y-12 transition-all duration-300 z-50"><p></p></div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -123,10 +164,21 @@
                     editor: document.getElementById('editor'),
                     notification: document.getElementById('notification'),
                     fabContainer: document.getElementById('fab-container'),
+                    fabToggle: document.getElementById('fab-toggle'),
+                    theme: {
+                        toggleBtn: document.querySelector('[data-action="toggleTheme"]'),
+                        lightIcon: document.getElementById('theme-icon-light'),
+                        darkIcon: document.getElementById('theme-icon-dark'),
+                    },
+                    statusBar: {
+                        wordCount: document.getElementById('word-count'),
+                        charCount: document.getElementById('char-count'),
+                    },
                     modals: {
                         settings: document.getElementById('settings-modal'),
                         preview: document.getElementById('preview-modal'),
                         share: document.getElementById('share-modal'),
+                        confirmClear: document.getElementById('confirm-clear-modal'),
                     },
                     previewContent: document.getElementById('preview-content-wrapper'),
                     shareBtn: document.querySelector('#share-modal [data-action="share"]'),
@@ -134,20 +186,42 @@
                 state: {
                     generatedBlob: null,
                     generatedFileName: '',
+                    currentTheme: 'light',
                 },
                 config: {
-                    spinner: `<svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>`,
+                    spinner: `<svg class="animate-spin h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>`,
                 },
 
                 init() {
+                    this.theme.init();
                     this.bindEvents();
                     this.actions.load();
+                    this.updateWordCount();
                 },
 
                 bindEvents() {
                     document.body.addEventListener('click', this.handleAction.bind(this));
+                    this.ui.editor.addEventListener('input', this.updateWordCount.bind(this));
+                     // Fechar FAB ao clicar fora
+                    document.addEventListener('click', (e) => {
+                        if (this.ui.fabContainer.classList.contains('open') && !this.ui.fabContainer.contains(e.target)) {
+                            this.ui.fabContainer.classList.remove('open');
+                        }
+                    });
+                     this.ui.fabToggle.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        this.ui.fabContainer.classList.toggle('open');
+                    });
                 },
 
+                updateWordCount() {
+                    const text = this.ui.editor.value;
+                    const charCount = text.length;
+                    const wordCount = text.trim().split(/\s+/).filter(Boolean).length;
+                    this.ui.statusBar.wordCount.textContent = `${wordCount} palavras`;
+                    this.ui.statusBar.charCount.textContent = `${charCount} caracteres`;
+                },
+                
                 async handleAction(e) {
                     const target = e.target.closest('[data-action]');
                     if (!target) return;
@@ -155,8 +229,8 @@
                     const action = target.dataset.action;
                     if (this.actions[action]) {
                         e.preventDefault();
-                        if (target.closest('.fab-menu-item')) {
-                            this.ui.fabContainer.classList.remove('open');
+                        if (target.closest('#fab-menu')) {
+                           this.ui.fabContainer.classList.remove('open');
                         }
                         await this.actions[action].call(this, target);
                     }
@@ -174,14 +248,19 @@
                     },
                     load() {
                         const draft = localStorage.getItem('abntDraft');
-                        if (draft) this.ui.editor.value = draft;
-                    },
-                    clear() {
-                        if (confirm('Tem certeza que deseja limpar o editor?')) {
-                            this.ui.editor.value = '';
-                            this.utils.showNotification('Editor limpo.');
+                        if (draft) {
+                            this.ui.editor.value = draft;
+                            this.updateWordCount();
                         }
                     },
+                    clear() { this.utils.openModal(this.ui.modals.confirmClear); },
+                    confirmClear() {
+                        this.ui.editor.value = '';
+                        this.updateWordCount();
+                        this.utils.closeModal(this.ui.modals.confirmClear);
+                        this.utils.showNotification('Editor limpo.');
+                    },
+                    cancelClear() { this.utils.closeModal(this.ui.modals.confirmClear); },
                     preview() {
                         this.ui.previewContent.innerHTML = this.utils.getFormattedContentForPreview();
                         this.utils.openModal(this.ui.modals.preview);
@@ -192,7 +271,12 @@
                         saveAs(this.state.generatedBlob, this.state.generatedFileName);
                         this.utils.closeModal(this.ui.modals.share);
                     },
+                    toggleTheme() { this.theme.toggle(); },
                     async share() {
+                        if (!navigator.share) {
+                             this.utils.showNotification('Compartilhamento não suportado neste navegador.', true);
+                             return;
+                        }
                         const fileToShare = new File([this.state.generatedBlob], this.state.generatedFileName, { type: this.state.generatedBlob.type });
                         try {
                             await navigator.share({ files: [fileToShare], title: this.state.generatedFileName, text: 'Documento criado com o Redator ABNT.' });
@@ -214,75 +298,54 @@
                             const { jsPDF } = window.jspdf;
                             const doc = new jsPDF({ unit: 'mm', format: 'a4' });
                             
-                            const ABNT = { FONT_SIZE: 12, LEFT_MARGIN: 30, RIGHT_MARGIN: 20, TOP_MARGIN: 30, BOTTOM_MARGIN: 20, PARAGRAPH_INDENT: 12.5, LINE_SPACING: 1.5 };
+                            const ABNT = { FONT: 'Times', FONT_SIZE: 12, LEFT_MARGIN: 30, RIGHT_MARGIN: 20, TOP_MARGIN: 30, BOTTOM_MARGIN: 20, PARAGRAPH_INDENT: 12.5, LINE_SPACING_MULTIPLIER: 1.5 };
                             const PAGE = { WIDTH: doc.internal.pageSize.getWidth(), HEIGHT: doc.internal.pageSize.getHeight() };
                             PAGE.PRINTABLE_WIDTH = PAGE.WIDTH - ABNT.LEFT_MARGIN - ABNT.RIGHT_MARGIN;
-                            const FONT_PT_TO_MM = 0.352778;
-                            ABNT.LINE_HEIGHT_MM = (ABNT.FONT_SIZE * FONT_PT_TO_MM) * ABNT.LINE_SPACING;
-
-                            doc.setFont("Helvetica", "normal");
+                            
+                            doc.setFont(ABNT.FONT, "normal");
                             doc.setFontSize(ABNT.FONT_SIZE);
+                            // jsPDF usa 'leading' (espaçamento) em 'pt'. A altura da linha é Font Size * Multiplicador
+                            const lineHeightPt = ABNT.FONT_SIZE * ABNT.LINE_SPACING_MULTIPLIER;
+                            doc.setLineHeightFactor(ABNT.LINE_SPACING_MULTIPLIER);
+                            // Convertendo para mm para nosso cursor
+                            const FONT_PT_TO_MM = 0.352778;
+                            ABNT.LINE_HEIGHT_MM = (ABNT.FONT_SIZE * FONT_PT_TO_MM) * ABNT.LINE_SPACING_MULTIPLIER;
 
                             let cursorY = ABNT.TOP_MARGIN;
                             const paragraphs = this.ui.editor.value.split('\n');
 
-                            for (const paragraph of paragraphs) {
-                                const addPageIfNeeded = () => {
-                                    if (cursorY + ABNT.LINE_HEIGHT_MM > PAGE.HEIGHT - ABNT.BOTTOM_MARGIN) {
+                            paragraphs.forEach((para, pIndex) => {
+                                if (para.trim() === "") {
+                                     if (cursorY + ABNT.LINE_HEIGHT_MM <= PAGE.HEIGHT - ABNT.BOTTOM_MARGIN) {
+                                        cursorY += ABNT.LINE_HEIGHT_MM;
+                                    } else {
                                         doc.addPage();
                                         cursorY = ABNT.TOP_MARGIN;
                                     }
-                                };
+                                    return;
+                                }
+
+                                const lines = doc.splitTextToSize(para, PAGE.PRINTABLE_WIDTH - ABNT.PARAGRAPH_INDENT);
+                                const paraHeight = lines.length * ABNT.LINE_HEIGHT_MM;
+
+                                if (cursorY + paraHeight > PAGE.HEIGHT - ABNT.BOTTOM_MARGIN && cursorY > ABNT.TOP_MARGIN) {
+                                    doc.addPage();
+                                    cursorY = ABNT.TOP_MARGIN;
+                                }
+
+                                // NOTA: A justificação perfeita no jsPDF é complexa.
+                                // A biblioteca alinha o texto em relação às margens da página, não a uma caixa de texto customizada.
+                                // Para um resultado ideal, a exportação para Word (DOCX) é recomendada.
+                                // Aqui, usamos uma aproximação com recuo.
+                                doc.text(para, ABNT.LEFT_MARGIN + ABNT.PARAGRAPH_INDENT, cursorY, {
+                                    maxWidth: PAGE.PRINTABLE_WIDTH - ABNT.PARAGRAPH_INDENT,
+                                    align: 'justify'
+                                });
                                 
-                                if (paragraph.trim() === "") {
-                                    addPageIfNeeded();
-                                    cursorY += ABNT.LINE_HEIGHT_MM;
-                                    continue;
-                                }
-
-                                const words = paragraph.split(/\s+/);
-                                let currentLine = '';
-                                let isFirstLineOfPara = true;
-
-                                for (let i = 0; i < words.length; i++) {
-                                    const word = words[i];
-                                    const testLine = currentLine ? `${currentLine} ${word}` : word;
-                                    const availableWidth = isFirstLineOfPara ? PAGE.PRINTABLE_WIDTH - ABNT.PARAGRAPH_INDENT : PAGE.PRINTABLE_WIDTH;
-
-                                    if (doc.getTextWidth(testLine) > availableWidth) {
-                                        addPageIfNeeded();
-                                        const x = isFirstLineOfPara ? ABNT.LEFT_MARGIN + ABNT.PARAGRAPH_INDENT : ABNT.LEFT_MARGIN;
-                                        
-                                        const lineWords = currentLine.split(' ');
-                                        if (lineWords.length > 1) {
-                                            const totalWordWidth = doc.getTextWidth(lineWords.join(''));
-                                            const totalSpace = availableWidth - totalWordWidth;
-                                            const spaceWidth = totalSpace / (lineWords.length - 1);
-                                            
-                                            let currentX = x;
-                                            lineWords.forEach(w => {
-                                                doc.text(w, currentX, cursorY);
-                                                currentX += doc.getTextWidth(w) + spaceWidth;
-                                            });
-                                        } else {
-                                            doc.text(currentLine, x, cursorY);
-                                        }
-                                        
-                                        cursorY += ABNT.LINE_HEIGHT_MM;
-                                        currentLine = word;
-                                        isFirstLineOfPara = false;
-                                    } else {
-                                        currentLine = testLine;
-                                    }
-                                }
-                                
-                                if (currentLine) {
-                                    addPageIfNeeded();
-                                    const x = isFirstLineOfPara ? ABNT.LEFT_MARGIN + ABNT.PARAGRAPH_INDENT : ABNT.LEFT_MARGIN;
-                                    doc.text(currentLine, x, cursorY);
-                                    cursorY += ABNT.LINE_HEIGHT_MM;
-                                }
-                            }
+                                // Recalcula as linhas considerando o recuo para avançar o cursor Y corretamente
+                                const renderedLines = doc.splitTextToSize(para, PAGE.PRINTABLE_WIDTH - ABNT.PARAGRAPH_INDENT);
+                                cursorY += renderedLines.length * (ABNT.FONT_SIZE * ABNT.LINE_SPACING_MULTIPLIER * FONT_PT_TO_MM);
+                            });
 
                             this.state.generatedBlob = doc.output('blob');
                             this.state.generatedFileName = 'documento-ABNT.pdf';
@@ -304,21 +367,17 @@
 
                             const paragraphs = this.ui.editor.value.split('\n').map(text => {
                                 return new Paragraph({
-                                    children: [new TextRun({ text: text, font: "Arial", size: 24 })], // 12pt * 2
+                                    children: [new TextRun({ text: text, font: "Times New Roman", size: 24 })], // 12pt * 2
                                     alignment: AlignmentType.JUSTIFIED,
-                                    spacing: { line: 360 }, // 1.5
-                                    indent: { firstLine: 709 }, // 1.25cm
+                                    spacing: { line: 360 }, // 1.5 (360 twips)
+                                    indent: { firstLine: 709 }, // 1.25cm (709 twips)
                                 });
                             });
 
                             const doc = new Document({
                                 sections: [{
                                     properties: {
-                                        page: {
-                                            margin: {
-                                                top: 1701, right: 1134, bottom: 1134, left: 1701,
-                                            },
-                                        },
+                                        page: { margin: { top: 1701, right: 1134, bottom: 1134, left: 1701 } }, // 3cm, 2cm, 2cm, 3cm em Twips
                                     },
                                     children: paragraphs,
                                 }],
@@ -335,18 +394,51 @@
                         }
                     }
                 },
+                
+                theme: {
+                    init() {
+                        const app = AbntEditorApp;
+                        const savedTheme = localStorage.getItem('theme');
+                        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                        if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+                            app.state.currentTheme = 'dark';
+                        } else {
+                            app.state.currentTheme = 'light';
+                        }
+                        this.apply();
+                    },
+                    toggle() {
+                        const app = AbntEditorApp;
+                        app.state.currentTheme = app.state.currentTheme === 'light' ? 'dark' : 'light';
+                        localStorage.setItem('theme', app.state.currentTheme);
+                        this.apply();
+                    },
+                    apply() {
+                        const app = AbntEditorApp;
+                        if (app.state.currentTheme === 'dark') {
+                            document.documentElement.classList.add('dark');
+                            app.ui.theme.lightIcon.classList.add('hidden');
+                            app.ui.theme.darkIcon.classList.remove('hidden');
+                        } else {
+                            document.documentElement.classList.remove('dark');
+                            app.ui.theme.lightIcon.classList.remove('hidden');
+                            app.ui.theme.darkIcon.classList.add('hidden');
+                        }
+                    }
+                },
 
                 utils: {
                     showNotification(message, isError = false, duration = 3000) {
                         const app = AbntEditorApp;
                         app.ui.notification.querySelector('p').textContent = message;
-                        app.ui.notification.classList.toggle('bg-red-500', isError);
-                        app.ui.notification.classList.toggle('bg-green-500', !isError);
-                        app.ui.notification.classList.remove('opacity-0', '-translate-y-12');
+                        app.ui.notification.className = `fixed top-5 right-5 text-white px-6 py-3 rounded-lg shadow-lg opacity-0 transform -translate-y-12 transition-all duration-300 z-50 ${isError ? 'bg-red-500' : 'bg-green-500'}`;
+                        requestAnimationFrame(() => {
+                           app.ui.notification.classList.remove('opacity-0', '-translate-y-12');
+                        });
                         setTimeout(() => app.ui.notification.classList.add('opacity-0', '-translate-y-12'), duration);
                     },
                     getFormattedContentForPreview() {
-                        return AbntEditorApp.ui.editor.value.split('\n').map(p => `<p style="text-indent: 1.25cm; margin: 0;">${p.trim() ? p.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') : '&nbsp;'}</p>`).join('');
+                        return AbntEditorApp.ui.editor.value.split('\n').map(p => `<p style="text-indent: 1.25cm; margin-bottom: 0;">${p.trim() ? p.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') : '&nbsp;'}</p>`).join('');
                     },
                     setButtonLoading(btn, isLoading, originalHTML = '') {
                         btn.disabled = isLoading;
@@ -354,23 +446,16 @@
                     },
                     openModal(modal) {
                         modal.classList.remove('hidden');
-                        modal.firstElementChild.classList.add('modal-enter-active');
                     },
                     closeModal(modal) {
                         if (!modal) return;
-                        modal.firstElementChild.classList.add('modal-leave-active');
-                        setTimeout(() => {
-                            modal.classList.add('hidden');
-                            modal.firstElementChild.classList.remove('modal-enter-active', 'modal-leave-active');
-                        }, 200);
+                        modal.classList.add('hidden');
                     },
                     showShareModal() {
                         const app = AbntEditorApp;
-                        if (navigator.share && navigator.canShare) {
-                            const file = new File([app.state.generatedBlob], app.state.generatedFileName, { type: app.state.generatedBlob.type });
-                            if (navigator.canShare({ files: [file] })) {
-                                app.ui.shareBtn.classList.remove('hidden');
-                            }
+                        // Web Share API é complexa com blobs, então simplificamos. Habilitamos se o navegador suportar.
+                        if (navigator.share) {
+                            app.ui.shareBtn.classList.remove('hidden');
                         } else {
                             app.ui.shareBtn.classList.add('hidden');
                         }
@@ -380,21 +465,8 @@
             };
             
             AbntEditorApp.init();
-
-            const fabContainer = document.getElementById('fab-container');
-            const fabToggle = document.getElementById('fab-toggle');
-            fabToggle.addEventListener('click', (e) => {
-                e.stopPropagation();
-                fabContainer.classList.toggle('open');
-            });
-            document.addEventListener('click', (e) => {
-                if (fabContainer.classList.contains('open') && !fabContainer.contains(e.target)) {
-                    fabContainer.classList.remove('open');
-                }
-            });
         });
     </script>
 </body>
 </html>
-
 
