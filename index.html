@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Redator ABNT (Save Confiável)</title>
+    <title>Redator ABNT (Botão Salvar Corrigido)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Bibliotecas para Exportação -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -133,7 +133,6 @@
     <!-- Botão Flutuante (FAB) para Mobile -->
     <div id="fab-container" class="md:hidden fixed bottom-6 right-6 z-30">
         <div id="fab-menu" class="absolute bottom-20 right-0 w-64 bg-white dark:bg-gray-800 rounded-lg shadow-2xl py-2">
-            <!-- Conteúdo do FAB -->
             <button data-action="save" class="w-full text-left px-4 py-3 flex items-center gap-3 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M7.707 10.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V6a1 1 0 10-2 0v5.586L7.707 10.293zM5 3a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V5a2 2 0 00-2-2H5z" /></svg><span>Salvar</span></button>
             <button data-action="load" class="w-full text-left px-4 py-3 flex items-center gap-3 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd" /></svg><span>Carregar</span></button>
             <hr class="my-1 border-gray-200 dark:border-gray-600"/>
@@ -198,7 +197,7 @@
                     
                     this.ui.editor.addEventListener('input', () => {
                         this.updateWordCount();
-                        this.actions.save(); // Salva a cada tecla pressionada
+                        this.actions.autoSave(); // Salva silenciosamente a cada tecla
                     });
 
                      document.addEventListener('click', (e) => {
@@ -231,22 +230,27 @@
                         if (target.closest('#fab-menu')) {
                            this.ui.fabContainer.classList.remove('open');
                         }
-                        // O botão de salvar agora só dá feedback visual, a lógica de salvar já acontece no 'input'
-                        if (action === 'save') {
-                            this.utils.showNotification('Rascunho salvo com sucesso!');
-                            return;
-                        }
                         await this.actions[action].call(this, target);
                     }
                 },
 
                 actions: {
-                    save() {
+                    // Salvamento automático e silencioso, chamado no 'input'
+                    autoSave() {
                         try {
                             localStorage.setItem('abntDraft', this.ui.editor.value);
                         } catch (error) {
-                            console.error("Erro ao salvar rascunho:", error);
-                            // Pode-se adicionar um feedback visual de erro aqui se necessário
+                            console.error("Erro ao salvar rascunho (auto):", error);
+                        }
+                    },
+                    // Salvamento manual, chamado pelo botão, que dá feedback
+                    save() {
+                        try {
+                            localStorage.setItem('abntDraft', this.ui.editor.value);
+                            this.utils.showNotification('Rascunho salvo com sucesso!');
+                        } catch (error) {
+                            console.error("Erro ao salvar rascunho (manual):", error);
+                            this.utils.showNotification('Falha ao salvar o rascunho.', true);
                         }
                     },
                     load() {
@@ -254,7 +258,7 @@
                         if (draft) {
                             this.ui.editor.value = draft;
                         }
-                        this.updateWordCount(); // Sempre atualiza a contagem ao carregar
+                        this.updateWordCount();
                     },
                     clear() { this.utils.openModal(this.ui.modals.confirmClear); },
                     confirmClear() {
@@ -314,7 +318,7 @@
                             const paragraphs = this.ui.editor.value.split('\n');
 
                              for (const paragraph of paragraphs) {
-                                if (cursorY > PAGE.HEIGHT - ABNT.BOTTOM_MARGIN) {
+                                if (cursorY > PAGE.HEIGHT - ABNT.BOTTOM_MARGIN - ABNT.LINE_HEIGHT_MM) {
                                     doc.addPage();
                                     cursorY = ABNT.TOP_MARGIN;
                                 }
