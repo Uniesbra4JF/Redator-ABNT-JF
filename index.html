@@ -10,7 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Bibliotecas para Exportação -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://unpkg.com/html-to-docx@1.8.0/dist/browser/html-to-docx.js"></script>
+    <script src="https://unpkg.com/docx@8.5.0/build/index.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <style>
         html, body { height: 100%; }
@@ -83,7 +83,7 @@
                     <svg class="h-8 w-8 mr-2 text-blue-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v11.494m-5.747-8.494h11.494M4 12a8 8 0 018-8v0a8 8 0 018 8v0a8 8 0 01-8 8v0a8 8 0 01-8-8v0z" /></svg>
                     <h1 class="text-xl font-bold">Redator ABNT</h1>
                 </div>
-                <button id="settings-btn" class="p-2 rounded-full hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white" title="Configurações"><svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg></button>
+                <button data-action="openSettings" class="p-2 rounded-full hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white" title="Configurações"><svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924-1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg></button>
             </div>
         </div>
     </header>
@@ -93,13 +93,13 @@
         <aside class="hidden md:block w-full md:w-72">
             <div class="bg-white p-4 rounded-lg shadow-md space-y-3 sticky top-24">
                 <h2 class="font-bold text-lg text-center mb-4">Ações</h2>
-                <button id="save-draft-btn" class="action-btn w-full bg-blue-600 text-white hover:bg-blue-700">Salvar Rascunho</button>
-                <button id="load-draft-btn" class="action-btn w-full bg-gray-200 text-gray-800 hover:bg-gray-300">Carregar Rascunho</button>
-                <button id="clear-editor-btn" class="action-btn w-full bg-red-500 text-white hover:bg-red-600">Limpar Editor</button>
+                <button data-action="save" class="action-btn w-full bg-blue-600 text-white hover:bg-blue-700">Salvar Rascunho</button>
+                <button data-action="load" class="action-btn w-full bg-gray-200 text-gray-800 hover:bg-gray-300">Carregar Rascunho</button>
+                <button data-action="clear" class="action-btn w-full bg-red-500 text-white hover:bg-red-600">Limpar Editor</button>
                 <hr class="my-3"/>
-                <button id="preview-btn" class="action-btn w-full bg-green-500 text-white hover:bg-green-600">Pré-visualizar ABNT</button>
-                <button id="export-pdf-btn" class="action-btn w-full bg-gray-800 text-white hover:bg-black">Exportar PDF</button>
-                <button id="export-docx-btn" class="action-btn w-full bg-gray-800 text-white hover:bg-black">Exportar Word</button>
+                <button data-action="preview" class="action-btn w-full bg-green-500 text-white hover:bg-green-600">Pré-visualizar ABNT</button>
+                <button data-action="pdf" class="action-btn w-full bg-gray-800 text-white hover:bg-black">Exportar PDF</button>
+                <button data-action="docx" class="action-btn w-full bg-gray-800 text-white hover:bg-black">Exportar Word</button>
             </div>
         </aside>
     </main>
@@ -108,202 +108,299 @@
 
     <div id="fab-container" class="md:hidden fixed bottom-6 right-6 z-30">
         <div id="fab-menu" class="absolute bottom-20 right-0 w-64 bg-white rounded-lg shadow-2xl py-2"><button data-action="save" class="fab-menu-item w-full text-left px-4 py-3 text-gray-700 hover:bg-gray-100"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M7.707 10.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V6a1 1 0 10-2 0v5.586L7.707 10.293zM5 3a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V5a2 2 0 00-2-2H5z" /></svg><span>Salvar Rascunho</span></button><button data-action="load" class="fab-menu-item w-full text-left px-4 py-3 text-gray-700 hover:bg-gray-100"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd" /></svg><span>Carregar Rascunho</span></button><hr class="my-1" /><button data-action="preview" class="fab-menu-item w-full text-left px-4 py-3 text-gray-700 hover:bg-gray-100"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z" /><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.022 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" /></svg><span>Pré-visualizar</span></button><button data-action="pdf" class="fab-menu-item w-full text-left px-4 py-3 text-gray-700 hover:bg-gray-100"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 0v4.586A1.5 1.5 0 007.586 10H12v2.5a.5.5 0 01-1 0V10H7.5a.5.5 0 01-.5-.5V4H6z" clip-rule="evenodd" /></svg><span>Exportar PDF</span></button><button data-action="docx" class="fab-menu-item w-full text-left px-4 py-3 text-gray-700 hover:bg-gray-100"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 0v4.586A1.5 1.5 0 007.586 10H12v2.5a.5.5 0 01-1 0V10H7.5a.5.5 0 01-.5-.5V4H6z" clip-rule="evenodd" /></svg><span>Exportar Word</span></button><hr class="my-1" /><button data-action="clear" class="fab-menu-item w-full text-left px-4 py-3 text-red-500 hover:bg-red-50"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg><span>Limpar Editor</span></button></div>
-        <button id="fab" class="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center text-white shadow-lg focus:outline-none"><svg id="fab-icon-open" class="h-8 w-8 transition-transform duration-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg></button>
+        <button id="fab-toggle" class="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center text-white shadow-lg focus:outline-none"><svg id="fab-icon-open" class="h-8 w-8 transition-transform duration-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg></button>
     </div>
     
-    <div id="settings-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-40 hidden"><div class="bg-white rounded-lg shadow-xl w-full max-w-md p-6"><div class="flex justify-between items-center mb-4"><h2 class="text-2xl font-bold">Configurações ABNT</h2><button id="close-settings-btn" class="text-gray-500 hover:text-gray-800 text-3xl">&times;</button></div><p class="text-gray-600">Funcionalidade em desenvolvimento.</p><div class="mt-6 flex justify-end"><button id="close-settings-btn-2" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Fechar</button></div></div></div>
-    <div id="preview-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-40 hidden"><div class="bg-white rounded-lg shadow-xl w-full max-w-4xl h-5/6 flex flex-col"><div class="flex justify-between items-center p-4 border-b"><h2 class="text-2xl font-bold">Pré-visualização ABNT</h2><button id="close-preview-btn" class="text-gray-500 hover:text-gray-800 text-3xl">&times;</button></div><div id="preview-area" class="p-6 overflow-y-auto flex-grow bg-gray-200"><div id="preview-content-wrapper" class="preview-content shadow-lg mx-auto" style="width: 21cm; min-height: 29.7cm;"></div></div><div class="p-4 border-t flex justify-end bg-gray-50"><button id="close-preview-btn-2" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Fechar</button></div></div></div>
-    <div id="share-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden"><div class="bg-white rounded-lg shadow-xl w-full max-w-sm p-6 text-center"><h2 class="text-2xl font-bold mb-2">Arquivo Gerado!</h2><p class="text-gray-600 mb-6">Seu documento está pronto. O que você gostaria de fazer?</p><div class="flex flex-col space-y-3"><button id="download-file-btn" class="action-btn w-full bg-blue-600 text-white hover:bg-blue-700">Baixar Arquivo</button><button id="share-file-btn" class="action-btn w-full bg-green-500 text-white hover:bg-green-600 hidden">Compartilhar</button><button id="close-share-btn" class="mt-4 text-gray-600 hover:text-gray-800">Fechar</button></div></div></div>
+    <div id="settings-modal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-40 hidden"><div class="bg-white rounded-lg shadow-xl w-full max-w-md p-6"><div class="flex justify-between items-center mb-4"><h2 class="text-2xl font-bold">Configurações ABNT</h2><button data-action="closeModal" class="text-gray-500 hover:text-gray-800 text-3xl">&times;</button></div><p class="text-gray-600">Funcionalidade em desenvolvimento.</p><div class="mt-6 flex justify-end"><button data-action="closeModal" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Fechar</button></div></div></div>
+    <div id="preview-modal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-40 hidden"><div class="bg-white rounded-lg shadow-xl w-full max-w-4xl h-5/6 flex flex-col"><div class="flex justify-between items-center p-4 border-b"><h2 class="text-2xl font-bold">Pré-visualização ABNT</h2><button data-action="closeModal" class="text-gray-500 hover:text-gray-800 text-3xl">&times;</button></div><div id="preview-area" class="p-6 overflow-y-auto flex-grow bg-gray-200"><div id="preview-content-wrapper" class="preview-content shadow-lg mx-auto" style="width: 21cm; min-height: 29.7cm;"></div></div><div class="p-4 border-t flex justify-end bg-gray-50"><button data-action="closeModal" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Fechar</button></div></div></div>
+    <div id="share-modal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden"><div class="bg-white rounded-lg shadow-xl w-full max-w-sm p-6 text-center"><h2 class="text-2xl font-bold mb-2">Arquivo Gerado!</h2><p class="text-gray-600 mb-6">Seu documento está pronto. O que você gostaria de fazer?</p><div class="flex flex-col space-y-3"><button data-action="download" class="action-btn w-full bg-blue-600 text-white hover:bg-blue-700">Baixar Arquivo</button><button data-action="share" class="action-btn w-full bg-green-500 text-white hover:bg-green-600 hidden">Compartilhar</button><button data-action="closeModal" class="mt-4 text-gray-600 hover:text-gray-800">Fechar</button></div></div></div>
     <div id="notification" class="fixed top-5 right-5 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg opacity-0 transform -translate-y-12 transition-all duration-300 z-50"><p></p></div>
 
     <script>
-        const { jsPDF } = window.jspdf;
-        const editor = document.getElementById('editor');
-        const notification = document.getElementById('notification');
-        let generatedBlob = null;
-        let generatedFileName = '';
+        document.addEventListener('DOMContentLoaded', () => {
+            const AbntEditorApp = {
+                ui: {
+                    editor: document.getElementById('editor'),
+                    notification: document.getElementById('notification'),
+                    fabContainer: document.getElementById('fab-container'),
+                    modals: {
+                        settings: document.getElementById('settings-modal'),
+                        preview: document.getElementById('preview-modal'),
+                        share: document.getElementById('share-modal'),
+                    },
+                    previewContent: document.getElementById('preview-content-wrapper'),
+                    shareBtn: document.querySelector('#share-modal [data-action="share"]'),
+                },
+                state: {
+                    generatedBlob: null,
+                    generatedFileName: '',
+                },
+                config: {
+                    spinner: `<svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>`,
+                },
 
-        const spinner = `<svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>`;
+                init() {
+                    this.bindEvents();
+                    this.actions.load();
+                },
 
-        function showNotification(message, isError = false, duration = 3000) {
-            notification.querySelector('p').textContent = message;
-            notification.classList.toggle('bg-red-500', isError);
-            notification.classList.toggle('bg-green-500', !isError);
-            notification.classList.remove('opacity-0', '-translate-y-12');
-            setTimeout(() => notification.classList.add('opacity-0', '-translate-y-12'), duration);
-        }
+                bindEvents() {
+                    document.body.addEventListener('click', this.handleAction.bind(this));
+                },
 
-        function getFormattedContentForPreview() {
-            return editor.value.split('\n').map(p => {
-                const text = p.trim() ? p.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') : '&nbsp;';
-                return `<p style="text-indent: 1.25cm; margin: 0;">${text}</p>`;
-            }).join('');
-        }
-        
-        const actions = {
-            save: () => { localStorage.setItem('abntDraft', editor.value); showNotification('Rascunho salvo com sucesso!'); },
-            load: () => { const draft = localStorage.getItem('abntDraft'); if (draft) editor.value = draft; },
-            clear: () => { if (confirm('Tem certeza que deseja limpar o editor?')) { editor.value = ''; showNotification('Editor limpo.'); } },
-            preview: () => { document.getElementById('preview-content-wrapper').innerHTML = getFormattedContentForPreview(); openModal(document.getElementById('preview-modal')); },
-            pdf: async (btn) => {
-                if (!editor.value.trim()) return showNotification('O editor está vazio.', true);
-                const originalHTML = btn.innerHTML;
-                btn.disabled = true;
-                btn.innerHTML = `${spinner} <span>Gerando...</span>`;
+                async handleAction(e) {
+                    const target = e.target.closest('[data-action]');
+                    if (!target) return;
 
-                try {
-                    const doc = new jsPDF({ unit: 'mm', format: 'a4' });
-                    
-                    const FONT_SIZE = 12;
-                    const LEFT_MARGIN = 30;
-                    const RIGHT_MARGIN = 20;
-                    const TOP_MARGIN = 30;
-                    const BOTTOM_MARGIN = 20;
-                    const PARAGRAPH_INDENT = 12.5;
-                    const PAGE_WIDTH = doc.internal.pageSize.getWidth();
-                    const PAGE_HEIGHT = doc.internal.pageSize.getHeight();
-                    const PRINTABLE_WIDTH = PAGE_WIDTH - LEFT_MARGIN - RIGHT_MARGIN;
-                    const FONT_PT_TO_MM = 0.352778;
-                    const LINE_SPACING = 1.5;
-                    const LINE_HEIGHT_MM = (FONT_SIZE * FONT_PT_TO_MM) * LINE_SPACING;
-
-                    doc.setFont("Helvetica", "normal");
-                    doc.setFontSize(FONT_SIZE);
-
-                    let cursorY = TOP_MARGIN;
-                    const paragraphs = editor.value.split('\n');
-
-                    for (const paragraph of paragraphs) {
-                        if (paragraph.trim() === "") {
-                            if (cursorY + LINE_HEIGHT_MM > PAGE_HEIGHT - BOTTOM_MARGIN) {
-                                doc.addPage();
-                                cursorY = TOP_MARGIN;
-                            }
-                            cursorY += LINE_HEIGHT_MM;
-                            continue;
+                    const action = target.dataset.action;
+                    if (this.actions[action]) {
+                        e.preventDefault();
+                        if (target.closest('.fab-menu-item')) {
+                            this.ui.fabContainer.classList.remove('open');
                         }
+                        await this.actions[action].call(this, target);
+                    }
+                },
 
-                        const words = paragraph.split(/\s+/);
-                        let lines = [];
-                        let currentLine = '';
-                        let isFirstLineOfPara = true;
+                actions: {
+                    save() {
+                        try {
+                            localStorage.setItem('abntDraft', this.ui.editor.value);
+                            this.utils.showNotification('Rascunho salvo com sucesso!');
+                        } catch (error) {
+                            console.error("Erro ao salvar rascunho:", error);
+                            this.utils.showNotification('Falha ao salvar o rascunho.', true);
+                        }
+                    },
+                    load() {
+                        const draft = localStorage.getItem('abntDraft');
+                        if (draft) this.ui.editor.value = draft;
+                    },
+                    clear() {
+                        if (confirm('Tem certeza que deseja limpar o editor?')) {
+                            this.ui.editor.value = '';
+                            this.utils.showNotification('Editor limpo.');
+                        }
+                    },
+                    preview() {
+                        this.ui.previewContent.innerHTML = this.utils.getFormattedContentForPreview();
+                        this.utils.openModal(this.ui.modals.preview);
+                    },
+                    openSettings() { this.utils.openModal(this.ui.modals.settings); },
+                    closeModal(btn) { this.utils.closeModal(btn.closest('.modal')); },
+                    download() {
+                        saveAs(this.state.generatedBlob, this.state.generatedFileName);
+                        this.utils.closeModal(this.ui.modals.share);
+                    },
+                    async share() {
+                        const fileToShare = new File([this.state.generatedBlob], this.state.generatedFileName, { type: this.state.generatedBlob.type });
+                        try {
+                            await navigator.share({ files: [fileToShare], title: this.state.generatedFileName, text: 'Documento criado com o Redator ABNT.' });
+                        } catch (error) {
+                            if (error.name !== 'AbortError') {
+                                console.error('Erro ao compartilhar:', error);
+                                this.utils.showNotification('Não foi possível compartilhar o arquivo.', true);
+                            }
+                        } finally {
+                            this.utils.closeModal(this.ui.modals.share);
+                        }
+                    },
+                    async pdf(btn) {
+                        if (!this.ui.editor.value.trim()) return this.utils.showNotification('O editor está vazio.', true);
+                        const originalHTML = btn.innerHTML;
+                        this.utils.setButtonLoading(btn, true);
 
-                        for(let i = 0; i < words.length; i++) {
-                            let word = words[i];
-                            let lineWithNextWord = currentLine ? `${currentLine} ${word}` : word;
-                            let availableWidth = isFirstLineOfPara ? PRINTABLE_WIDTH - PARAGRAPH_INDENT : PRINTABLE_WIDTH;
+                        try {
+                            const { jsPDF } = window.jspdf;
+                            const doc = new jsPDF({ unit: 'mm', format: 'a4' });
                             
-                            if (doc.getTextWidth(lineWithNextWord) <= availableWidth) {
-                                currentLine = lineWithNextWord;
-                            } else {
+                            const ABNT = { FONT_SIZE: 12, LEFT_MARGIN: 30, RIGHT_MARGIN: 20, TOP_MARGIN: 30, BOTTOM_MARGIN: 20, PARAGRAPH_INDENT: 12.5, LINE_SPACING: 1.5 };
+                            const PAGE = { WIDTH: doc.internal.pageSize.getWidth(), HEIGHT: doc.internal.pageSize.getHeight() };
+                            PAGE.PRINTABLE_WIDTH = PAGE.WIDTH - ABNT.LEFT_MARGIN - ABNT.RIGHT_MARGIN;
+                            const FONT_PT_TO_MM = 0.352778;
+                            ABNT.LINE_HEIGHT_MM = (ABNT.FONT_SIZE * FONT_PT_TO_MM) * ABNT.LINE_SPACING;
+
+                            doc.setFont("Helvetica", "normal"); // Fonte padrão jsPDF (similar ao Arial)
+                            doc.setFontSize(ABNT.FONT_SIZE);
+
+                            let cursorY = ABNT.TOP_MARGIN;
+                            const paragraphs = this.ui.editor.value.split('\n');
+
+                            for (const paragraph of paragraphs) {
+                                const addPageIfNeeded = () => {
+                                    if (cursorY + ABNT.LINE_HEIGHT_MM > PAGE.HEIGHT - ABNT.BOTTOM_MARGIN) {
+                                        doc.addPage();
+                                        cursorY = ABNT.TOP_MARGIN;
+                                    }
+                                };
+                                
+                                if (paragraph.trim() === "") {
+                                    addPageIfNeeded();
+                                    cursorY += ABNT.LINE_HEIGHT_MM;
+                                    continue;
+                                }
+
+                                const words = paragraph.split(/\s+/);
+                                let lines = [];
+                                let currentLine = '';
+                                let isFirstLineOfPara = true;
+
+                                for(let i = 0; i < words.length; i++) {
+                                    let word = words[i];
+                                    let lineWithNextWord = currentLine ? `${currentLine} ${word}` : word;
+                                    let availableWidth = isFirstLineOfPara ? PAGE.PRINTABLE_WIDTH - ABNT.PARAGRAPH_INDENT : PAGE.PRINTABLE_WIDTH;
+                                    
+                                    if (doc.getTextWidth(lineWithNextWord) <= availableWidth) {
+                                        currentLine = lineWithNextWord;
+                                    } else {
+                                        lines.push(currentLine);
+                                        currentLine = word;
+                                        isFirstLineOfPara = false;
+                                    }
+                                }
                                 lines.push(currentLine);
-                                currentLine = word;
-                                isFirstLineOfPara = false;
+
+                                for (let i = 0; i < lines.length; i++) {
+                                    addPageIfNeeded();
+                                    const line = lines[i];
+                                    const isFirstLine = i === 0;
+                                    const isLastLine = i === lines.length - 1;
+                                    const xOffset = isFirstLine ? ABNT.LEFT_MARGIN + ABNT.PARAGRAPH_INDENT : ABNT.LEFT_MARGIN;
+                                    const renderWidth = isFirstLine ? PAGE.PRINTABLE_WIDTH - ABNT.PARAGRAPH_INDENT : PAGE.PRINTABLE_WIDTH;
+                                    const alignment = isLastLine ? 'left' : 'justify';
+                                    
+                                    doc.text(line, xOffset, cursorY, { align: alignment, maxWidth: renderWidth });
+                                    cursorY += ABNT.LINE_HEIGHT_MM;
+                                }
                             }
+
+                            this.state.generatedBlob = doc.output('blob');
+                            this.state.generatedFileName = 'documento-ABNT.pdf';
+                            this.utils.showShareModal();
+                        } catch (error) {
+                            console.error("Erro ao gerar PDF:", error);
+                            this.utils.showNotification('Falha ao gerar o PDF.', true);
+                        } finally {
+                            this.utils.setButtonLoading(btn, false, originalHTML);
                         }
-                        lines.push(currentLine);
+                    },
+                    async docx(btn) {
+                        if (!this.ui.editor.value.trim()) return this.utils.showNotification('O editor está vazio.', true);
+                        const originalHTML = btn.innerHTML;
+                        this.utils.setButtonLoading(btn, true);
+                        
+                        try {
+                            const { Document, Packer, Paragraph, TextRun, AlignmentType } = window.docx;
 
-                        for (let i = 0; i < lines.length; i++) {
-                            let line = lines[i];
-                            const isFirstLine = i === 0;
-                            const isLastLine = i === lines.length - 1;
+                            const paragraphs = this.ui.editor.value.split('\n').map(text => {
+                                return new Paragraph({
+                                    children: [new TextRun(text)],
+                                    style: "abntStyle",
+                                });
+                            });
 
-                            if (cursorY + LINE_HEIGHT_MM > PAGE_HEIGHT - BOTTOM_MARGIN) {
-                                doc.addPage();
-                                cursorY = TOP_MARGIN;
-                            }
-                            
-                            const xOffset = isFirstLine ? LEFT_MARGIN + PARAGRAPH_INDENT : LEFT_MARGIN;
-                            const renderWidth = isFirstLine ? PRINTABLE_WIDTH - PARAGRAPH_INDENT : PRINTABLE_WIDTH;
-                            const alignment = isLastLine ? 'left' : 'justify';
-                            
-                            doc.text(line, xOffset, cursorY, { align: alignment, maxWidth: renderWidth });
-                            cursorY += LINE_HEIGHT_MM;
+                            const doc = new Document({
+                                styles: {
+                                    paragraphStyles: [{
+                                        id: "abntStyle",
+                                        name: "ABNT Style",
+                                        basedOn: "Normal",
+                                        next: "Normal",
+                                        run: {
+                                            font: "Arial",
+                                            size: 24, // 12pt
+                                        },
+                                        paragraph: {
+                                            alignment: AlignmentType.JUSTIFIED,
+                                            spacing: { line: 360 }, // 1.5
+                                            indent: { firstLine: 709 }, // 1.25cm
+                                        },
+                                    }],
+                                },
+                                sections: [{
+                                    properties: {
+                                        page: {
+                                            margin: {
+                                                top: 1701,    // 3cm
+                                                right: 1134,  // 2cm
+                                                bottom: 1134, // 2cm
+                                                left: 1701,   // 3cm
+                                            },
+                                        },
+                                    },
+                                    children: paragraphs,
+                                }],
+                            });
+
+                            this.state.generatedBlob = await Packer.toBlob(doc);
+                            this.state.generatedFileName = 'documento-ABNT.docx';
+                            this.utils.showShareModal();
+                        } catch (error) {
+                            console.error("Erro ao gerar DOCX:", error);
+                            this.utils.showNotification('Falha ao gerar o Word.', true);
+                        } finally {
+                            this.utils.setButtonLoading(btn, false, originalHTML);
                         }
                     }
+                },
 
-                    generatedBlob = doc.output('blob');
-                    generatedFileName = 'documento-ABNT.pdf';
-                    showShareModal();
-                } catch (error) {
-                    console.error("Erro ao gerar PDF:", error);
-                    showNotification('Falha ao gerar o PDF.', true);
-                } finally {
-                    btn.disabled = false;
-                    btn.innerHTML = originalHTML;
+                utils: {
+                    showNotification(message, isError = false, duration = 3000) {
+                        const app = AbntEditorApp;
+                        app.ui.notification.querySelector('p').textContent = message;
+                        app.ui.notification.classList.toggle('bg-red-500', isError);
+                        app.ui.notification.classList.toggle('bg-green-500', !isError);
+                        app.ui.notification.classList.remove('opacity-0', '-translate-y-12');
+                        setTimeout(() => app.ui.notification.classList.add('opacity-0', '-translate-y-12'), duration);
+                    },
+                    getFormattedContentForPreview() {
+                        return AbntEditorApp.ui.editor.value.split('\n').map(p => `<p style="text-indent: 1.25cm; margin: 0;">${p.trim() ? p.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') : '&nbsp;'}</p>`).join('');
+                    },
+                    setButtonLoading(btn, isLoading, originalHTML = '') {
+                        btn.disabled = isLoading;
+                        btn.innerHTML = isLoading ? `${AbntEditorApp.config.spinner} <span>Processando...</span>` : originalHTML;
+                    },
+                    openModal(modal) {
+                        modal.classList.remove('hidden');
+                        modal.firstElementChild.classList.add('modal-enter-active');
+                    },
+                    closeModal(modal) {
+                        if (!modal) return;
+                        modal.firstElementChild.classList.add('modal-leave-active');
+                        setTimeout(() => {
+                            modal.classList.add('hidden');
+                            modal.firstElementChild.classList.remove('modal-enter-active', 'modal-leave-active');
+                        }, 200);
+                    },
+                    showShareModal() {
+                        const app = AbntEditorApp;
+                        if (navigator.share && navigator.canShare) {
+                            const file = new File([app.state.generatedBlob], app.state.generatedFileName, { type: app.state.generatedBlob.type });
+                            if (navigator.canShare({ files: [file] })) {
+                                app.ui.shareBtn.classList.remove('hidden');
+                            }
+                        } else {
+                            app.ui.shareBtn.classList.add('hidden');
+                        }
+                        this.openModal(app.ui.modals.share);
+                    }
                 }
-            },
-            docx: async (btn) => {
-                if (!editor.value.trim()) return showNotification('O editor está vazio.', true);
-                const originalHTML = btn.innerHTML;
-                btn.disabled = true;
-                btn.innerHTML = `${spinner} <span>Exportando...</span>`;
-
-                const content = editor.value.split('\n').map(p => `<p>${p.trim() ? p.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') : ''}</p>`).join('');
-                const htmlString = `<!DOCTYPE html><html><head></head><body>${content}</body></html>`;
-                
-                try {
-                    generatedBlob = await htmlToDocx(htmlString, null, {
-                        orientation: 'portrait',
-                        margins: { top: 1701, right: 1134, bottom: 1134, left: 1701 },
-                        font: 'Arial',
-                        fontSize: 24,
-                        paragraph: { spacing: { line: 360 }, alignment: 'justify', indentation: { firstLine: 709 } }
-                    });
-                    generatedFileName = 'documento-ABNT.docx';
-                    showShareModal();
-                } catch (error) { console.error("Erro ao gerar DOCX:", error); showNotification('Falha ao gerar o Word.', true);
-                } finally { btn.disabled = false; btn.innerHTML = originalHTML; }
-            }
-        };
-
-        function openModal(modal) { modal.classList.remove('hidden'); modal.firstElementChild.classList.add('modal-enter-active'); }
-        function closeModal(modal) {
-            modal.firstElementChild.classList.add('modal-leave-active');
-            setTimeout(() => { modal.classList.add('hidden'); modal.firstElementChild.classList.remove('modal-enter-active', 'modal-leave-active'); }, 200);
-        }
-
-        function showShareModal() {
-            const shareBtn = document.getElementById('share-file-btn');
-            if (navigator.share && navigator.canShare) {
-                const fileToShare = new File([generatedBlob], generatedFileName, { type: generatedBlob.type });
-                 if (navigator.canShare({ files: [fileToShare] })) { shareBtn.classList.remove('hidden'); }
-            } else { shareBtn.classList.add('hidden'); }
-            openModal(document.getElementById('share-modal'));
-        }
-
-        function setupEventListeners() {
-            document.querySelectorAll('aside .action-btn').forEach(btn => {
-                const action = btn.id.split('-')[1];
-                if(actions[action]) btn.addEventListener('click', e => actions[action](e.currentTarget));
-            });
+            };
+            
+            AbntEditorApp.init();
 
             const fabContainer = document.getElementById('fab-container');
-            const fab = document.getElementById('fab');
-            fab.addEventListener('click', (e) => { e.stopPropagation(); fabContainer.classList.toggle('open'); });
-            document.getElementById('fab-menu').addEventListener('click', e => {
-                const target = e.target.closest('.fab-menu-item');
-                if (target) {
-                    const action = target.dataset.action;
-                    if (actions[action]) actions[action](target);
+            const fabToggle = document.getElementById('fab-toggle');
+            fabToggle.addEventListener('click', (e) => {
+                e.stopPropagation();
+                fabContainer.classList.toggle('open');
+});
+            document.addEventListener('click', (e) => {
+                if (fabContainer.classList.contains('open') && !fabContainer.contains(e.target)) {
                     fabContainer.classList.remove('open');
                 }
             });
-            
-            document.getElementById('settings-btn').addEventListener('click', () => openModal(document.getElementById('settings-modal')));
-            document.querySelectorAll('[id^="close-"]').forEach(btn => { const modal = btn.closest('.fixed'); if(modal) btn.addEventListener('click', () => closeModal(modal)); });
-
-            document.getElementById('download-file-btn').addEventListener('click', () => { saveAs(generatedBlob, generatedFileName); closeModal(document.getElementById('share-modal')); });
-            document.getElementById('share-file-btn').addEventListener('click', async () => {
-                const fileToShare = new File([generatedBlob], generatedFileName, { type: generatedBlob.type });
-                try { await navigator.share({ files: [fileToShare], title: generatedFileName, text: 'Documento criado com o Redator ABNT.' });
-                } catch (error) { if (error.name !== 'AbortError') { console.error('Erro ao compartilhar:', error); showNotification('Não foi possível compartilhar o arquivo.', true); }
-                } finally { closeModal(document.getElementById('share-modal')); }
-            });
-            document.addEventListener('click', (e) => { if (fabContainer.classList.contains('open') && !fabContainer.contains(e.target)) { fabContainer.classList.remove('open'); } });
-        }
-        
-        document.addEventListener('DOMContentLoaded', () => { setupEventListeners(); actions.load(); });
+        });
     </script>
 </body>
 </html>
