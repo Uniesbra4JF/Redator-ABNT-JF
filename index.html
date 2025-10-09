@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Redator ABNT com Exportação TXT</title>
+    <title>Redator ABNT (Justificação Estável)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -303,7 +303,9 @@
                             let cursorY = ABNT.TOP_MARGIN;
                             const paragraphs = this.ui.editor.value.split('\n');
 
-                            for (const paragraph of paragraphs) {
+                            for (let pIndex = 0; pIndex < paragraphs.length; pIndex++) {
+                                const paragraph = paragraphs[pIndex];
+
                                 const addPageIfNeeded = () => {
                                     if (cursorY + ABNT.LINE_HEIGHT_MM > PAGE.HEIGHT - ABNT.BOTTOM_MARGIN) {
                                         doc.addPage();
@@ -317,30 +319,49 @@
                                     continue;
                                 }
 
-                                const words = paragraph.split(/\s+/);
-                                let currentLine = '';
-                                let isFirstLineOfPara = true;
+                                const lines = doc.splitTextToSize(paragraph, PAGE.PRINTABLE_WIDTH - (pIndex === 0 ? 0 : ABNT.PARAGRAPH_INDENT)); // Initial split
+                                const allWords = paragraph.split(/\s+/);
+                                let wordIndex = 0;
 
-                                for (const word of words) {
-                                    const availableWidth = isFirstLineOfPara ? PAGE.PRINTABLE_WIDTH - ABNT.PARAGRAPH_INDENT : PAGE.PRINTABLE_WIDTH;
-                                    const testLine = currentLine ? `${currentLine} ${word}` : word;
+                                while (wordIndex < allWords.length) {
+                                    let isFirstLineOfPara = (wordIndex === 0);
+                                    let availableWidth = PAGE.PRINTABLE_WIDTH - (isFirstLineOfPara ? ABNT.PARAGRAPH_INDENT : 0);
+                                    let lineWords = [];
+                                    let currentLine = '';
 
-                                    if (doc.getTextWidth(testLine) > availableWidth) {
-                                        addPageIfNeeded();
-                                        const x = isFirstLineOfPara ? ABNT.LEFT_MARGIN + ABNT.PARAGRAPH_INDENT : ABNT.LEFT_MARGIN;
-                                        doc.text(currentLine, x, cursorY);
-                                        cursorY += ABNT.LINE_HEIGHT_MM;
-                                        currentLine = word;
-                                        isFirstLineOfPara = false;
-                                    } else {
-                                        currentLine = testLine;
+                                    while(wordIndex < allWords.length) {
+                                        const word = allWords[wordIndex];
+                                        const testLine = currentLine ? `${currentLine} ${word}` : word;
+                                        if (doc.getTextWidth(testLine) <= availableWidth) {
+                                            currentLine = testLine;
+                                            lineWords.push(word);
+                                            wordIndex++;
+                                        } else {
+                                            break;
+                                        }
                                     }
-                                }
-                                
-                                if (currentLine) {
+
                                     addPageIfNeeded();
-                                    const x = isFirstLineOfPara ? ABNT.LEFT_MARGIN + ABNT.PARAGRAPH_INDENT : ABNT.LEFT_MARGIN;
-                                    doc.text(currentLine, x, cursorY);
+
+                                    const x = ABNT.LEFT_MARGIN + (isFirstLineOfPara ? ABNT.PARAGRAPH_INDENT : 0);
+                                    const isLastLineOfParagraph = (wordIndex === allWords.length);
+
+                                    // Apply manual justification only if it's not the last line of the paragraph and has more than one word
+                                    if (!isLastLineOfParagraph && lineWords.length > 1) {
+                                        const totalWordWidth = doc.getTextWidth(lineWords.join(''));
+                                        const totalSpace = availableWidth - totalWordWidth;
+                                        const spaceWidth = totalSpace / (lineWords.length - 1);
+                                        
+                                        let currentX = x;
+                                        lineWords.forEach(word => {
+                                            doc.text(word, currentX, cursorY);
+                                            currentX += doc.getTextWidth(word) + spaceWidth;
+                                        });
+                                    } else {
+                                        // Render left-aligned for the last line or single-word lines
+                                        doc.text(currentLine, x, cursorY);
+                                    }
+                                    
                                     cursorY += ABNT.LINE_HEIGHT_MM;
                                 }
                             }
